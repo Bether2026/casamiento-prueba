@@ -66,6 +66,9 @@
   .dash-date { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.45); margin-top: 0.2rem; }
   .logout-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.35); background: none; border: 1px solid rgba(201,168,76,0.14); border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; }
   .logout-btn:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
+  .header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+  .mesas-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: var(--deep); background: var(--gold); border: none; border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+  .mesas-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 
   /* STATS STRIP */
   .stats-strip { max-width: 1200px; margin: 2.5rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
@@ -159,7 +162,10 @@
         <h1 class="dash-heading">Lista de Invitados</h1>
         <p class="dash-date">14 · 06 · 2025</p>
       </div>
-      <button class="logout-btn" onclick="logout()">SALIR</button>
+      <div class="header-actions">
+        <a class="mesas-btn" href="mesas.html">🪑 &nbsp;VER MESAS</a>
+        <button class="logout-btn" onclick="logout()">SALIR</button>
+      </div>
     </div>
   </header>
 
