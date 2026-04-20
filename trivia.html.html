@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia · Sofía & Andrés</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --champagne: #f0e6d3;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --deep: #0d0905;
+    --ink: #2d2418;
+    --ivory: #faf7f2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--deep); font-family:'Montserrat',sans-serif; min-height:100vh; overflow-x:hidden; }
+
+#bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+.container {
+position:relative; z-index:1;
+min-height:100vh; display:flex; flex-direction:column;
+align-items:center; justify-content:center;
+padding: 2rem 1.5rem;
+}
+
+/* ── BACK LINK ── */
+.back-link {
+position:fixed; top:1.2rem; left:1.4rem; z-index:10;
+font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.35em;
+color:rgba(201,168,76,0.5); text-decoration:none;
+transition:color 0.3s;
+}
+.back-link:hover { color:var(--gold); }
+
+/* ── SCREENS ── */
+.screen { width:100%; max-width:560px; text-align:center; }
+.screen { display:none; }
+.screen.active { display:block; animation:fadeUp 0.6s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── TYPOGRAPHY ── */
+.trivia-label { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.5em; color:var(--gold); opacity:0.75; margin-bottom:0.6rem; }
+.trivia-title { font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,7vw,3.8rem); color:var(--champagne); font-weight:300; line-height:1.15; }
+.trivia-title em { color:var(--gold); font-style:italic; }
+.trivia-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.08rem; color:var(--champagne); opacity:0.55; line-height:1.7; margin:1.2rem 0 2.5rem; }
+
+.gold-line { width:60px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:1.2rem auto 2rem; }
+
+/* ── START BTN ── */
+.btn-start {
+display:inline-flex; align-items:center; gap:0.6rem;
+padding:0.9rem 2.2rem;
+font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.32em;
+background:var(--gold); color:var(--deep); border:none; border-radius:2px;
+cursor:pointer; transition:all 0.3s;
+}
+.btn-start:hover { background:var(--gold-light); transform:translateY(-2px); box-shadow:0 8px 24px rgba(201,168,76,0.28); }
+
+/* ── PROGRESS ── */
+.progress-bar-wrap { width:100%; height:2px; background:rgba(201,168,76,0.15); border-radius:1px; margin-bottom:2.5rem; overflow:hidden; }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:1px; transition:width 0.5s ease; }
+.progress-text { font-family:'Cinzel',serif; font-size:0.52rem; letter-spacing:0.4em; color:rgba(201,168,76,0.45); margin-bottom:1rem; }
+
+/* ── QUESTION ── */
+.question-num { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.5em; color:var(--gold); opacity:0.6; margin-bottom:0.8rem; }
+.question-text {
+font-family:'Cormorant Garamond',serif;
+font-size:clamp(1.3rem,4vw,1.9rem); color:var(--champagne);
+font-weight:300; line-height:1.45; margin-bottom:2rem;
+}
+
+/* ── OPTIONS ── */
+.options { display:flex; flex-direction:column; gap:0.7rem; }
+.option {
+padding:0.85rem 1.4rem;
+border:1px solid rgba(201,168,76,0.22); border-radius:2px;
+background:transparent; cursor:pointer;
+font-family:'Cormorant Garamond',serif; font-size:1.05rem;
+color:rgba(240,230,211,0.72); text-align:left;
+transition:all 0.25s; position:relative; overflow:hidden;
+}
+.option::before { content:''; position:absolute; inset:0; background:rgba(201,168,76,0.07); transform:scaleX(0); transform-origin:left; transition:transform 0.25s; }
+.option:hover::before { transform:scaleX(1); }
+.option:hover { border-color:rgba(201,168,76,0.55); color:var(--champagne); }
+.option.correct { border-color:#7ecfa0; background:rgba(126,207,160,0.1); color:#a8e8c4; }
+.option.wrong { border-color:#c97a7a; background:rgba(201,122,122,0.08); color:#d4a0a0; }
+.option.reveal { border-color:rgba(201,168,76,0.5); background:rgba(201,168,76,0.08); color:var(--gold); }
+.option.disabled { pointer-events:none; }
+
+/* ── FEEDBACK ── */
+.feedback {
+margin-top:1.4rem; min-height:3rem;
+font-family:'Cormorant Garamond',serif; font-style:italic;
+font-size:1.05rem; color:var(--champagne); line-height:1.5;
+opacity:0; transition:opacity 0.4s;
+}
+.feedback.show { opacity:1; }
+
+.btn-next {
+display:inline-flex; align-items:center; gap:0.5rem;
+margin-top:1.8rem; padding:0.75rem 1.9rem;
+font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.28em;
+background:transparent; color:var(--gold);
+border:1px solid rgba(201,168,76,0.4); border-radius:2px;
+cursor:pointer;
+opacity:0; pointer-events:none; transition:opacity 0.4s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-next.show { opacity:1; pointer-events:all; }
+.btn-next:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 18px rgba(201,168,76,0.15); }
+
+/* ── RESULTS ── */
+.result-score {
+font-family:'Cormorant Garamond',serif;
+font-size:clamp(4rem,14vw,8rem); color:var(--gold);
+font-weight:300; line-height:1; display:block; margin:0.5rem 0;
+}
+.result-total { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.45em; color:rgba(201,168,76,0.5); }
+.result-msg { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:clamp(1.2rem,3.5vw,1.7rem); color:var(--champagne); line-height:1.5; margin:1.5rem 0 0.5rem; max-width:420px; }
+.result-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; color:var(--champagne); opacity:0.5; }
+
+.btn-retry { display:inline-flex; align-items:center; gap:0.5rem; margin-top:2rem; padding:0.75rem 1.9rem; font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.28em; background:transparent; color:var(--champagne); border:1px solid rgba(201,168,76,0.3); border-radius:2px; cursor:pointer; transition:all 0.3s; }
+.btn-retry:hover { border-color:var(--gold); color:var(--gold); transform:translateY(-2px); }
+
+/* ── SCORE STARS ── */
+.stars { font-size:2rem; margin:0.5rem 0 1rem; letter-spacing:0.3rem; }
+
+/* ── CONFETTI ── */
+.confetti-piece { position:fixed; top:-10px; width:8px; height:8px; border-radius:2px; opacity:0; pointer-events:none; z-index:999; animation:confettiFall 3s ease-in forwards; }
+@keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) translateX(var(--cx)) rotate(var(--cr));opacity:0} }
+</style>
+
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<a href="index.html" class="back-link">← Volver a la invitación</a>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screenIntro">
+    <p class="trivia-label">Sofía &amp; Andrés</p>
+    <h1 class="trivia-title">¿Cuánto los <em>conocés?</em></h1>
+    <div class="gold-line"></div>
+    <p class="trivia-sub">
+      Poné a prueba tu amistad con los novios.<br>
+      10 preguntas sobre su historia de amor.
+    </p>
+    <button class="btn-start" onclick="startTrivia()">✦ &nbsp;Comenzar &nbsp;✦</button>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="screen" id="screenQuestion">
+    <p class="progress-text" id="progressText">Pregunta 1 de 10</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:10%"></div></div>
+    <p class="question-num" id="questionNum">01 / 10</p>
+    <p class="question-text" id="questionText"></p>
+    <div class="options" id="optionsContainer"></div>
+    <p class="feedback" id="feedback"></p>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente &nbsp;→</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screenResult">
+    <p class="trivia-label">Resultado final</p>
+    <div class="stars" id="resultStars">⭐</div>
+    <span class="result-score" id="resultScore">0</span>
+    <p class="result-total" id="resultTotal">DE 10 CORRECTAS</p>
+    <div class="gold-line"></div>
+    <p class="result-msg" id="resultMsg"></p>
+    <p class="result-sub" id="resultSub"></p>
+    <br>
+    <button class="btn-retry" onclick="restartTrivia()">↺ &nbsp;Jugar de nuevo</button>
+  </div>
+
+</div>
+
+<script>
+/* ══ CANVAS ══ */
+try {
+  const c=document.getElementById('bgCanvas'),x=c.getContext('2d');
+  let W,H,t=0;
+  const rz=()=>{W=c.width=innerWidth;H=c.height=innerHeight}; rz(); addEventListener('resize',rz);
+  const S=[];
+  for(let i=0;i<90;i++) S.push({px:Math.random(),py:Math.random(),r:.25+Math.random()*.85,sp:.00006+Math.random()*.00014,ph:Math.random()*Math.PI*2,g:Math.random()>.72});
+  const A=[{ax:.15,ay:.25,cr:.4,cg:.25,cb:.08},{ax:.6,ay:.2,cr:.32,cg:.18,cb:.06},{ax:.85,ay:.5,cr:.24,cg:.14,cb:.05}];
+  (function frame(){
+    t+=.004; x.clearRect(0,0,W,H);
+    const bg=x.createRadialGradient(W*.5,H*.4,0,W*.5,H*.5,W*.9);
+    bg.addColorStop(0,'#1a1007'); bg.addColorStop(.6,'#0e0904'); bg.addColorStop(1,'rgba(4,3,1,0)');
+    x.fillStyle=bg; x.fillRect(0,0,W,H);
+    A.forEach((a,i)=>{
+      const cx=(a.ax+Math.sin(t*.25+i*2)*.08)*W,cy=(a.ay+Math.cos(t*.15+i*2.5)*.06)*H,rad=W*(.28+Math.sin(t*.1+i)*.04);
+      const g=x.createRadialGradient(cx,cy,0,cx,cy,rad);
+      g.addColorStop(0,`rgba(${~~(a.cr*255)},${~~(a.cg*255)},${~~(a.cb*255)},.15)`);
+      g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    });
+    S.forEach(s=>{
+      const px=((s.px+t*s.sp)%1)*W,py=s.py*H,tw=.4+.6*Math.sin(t*3+s.ph);
+      x.beginPath(); x.arc(px,py,s.r,0,Math.PI*2);
+      x.fillStyle=s.g?`rgba(232,201,120,${.5*tw})`:`rgba(255,250,242,${.42*tw})`; x.fill();
+    });
+    requestAnimationFrame(frame);
+  })();
+} catch(e){}
+
+/* ══ QUESTIONS ══ */
+const QUESTIONS = [
+  {
+    q: "¿Dónde se conocieron Sofía y Andrés?",
+    opts: ["En una boda de amigos", "En la universidad", "En un viaje", "Por una app de citas"],
+    answer: 0,
+    fact: "¡Fue en la boda de sus mejores amigos! El destino los reunió bailando en la pista."
+  },
+  {
+    q: "¿Cuánto tiempo llevan juntos antes de casarse?",
+    opts: ["2 años", "4 años", "6 años", "8 años"],
+    answer: 1,
+    fact: "Cuatro años de aventuras, viajes y amor que los convirtieron en mejores amigos."
+  },
+  {
+    q: "¿En qué ciudad fue su primera cita?",
+    opts: ["Buenos Aires", "Mendoza", "Bariloche", "Córdoba"],
+    answer: 2,
+    fact: "Una escapada romántica a Bariloche que empezó todo. Montañas, chocolate y amor."
+  },
+  {
+    q: "¿Cuál es la canción que consideran 'suya'?",
+    opts: ["Perfect - Ed Sheeran", "Can't Help Falling in Love - Elvis", "Tenerife Sea - Ed Sheeran", "A Thousand Years - Christina Perri"],
+    answer: 2,
+    fact: "Tenerife Sea sonó la noche que Andrés le dijo a Sofía que estaba enamorado de ella."
+  },
+  {
+    q: "¿Cómo pidió Andrés matrimonio a Sofía?",
+    opts: ["En un restaurante con mariachis", "En una playa al atardecer", "En casa con sus familias", "En el lugar de su primera cita"],
+    answer: 3,
+    fact: "Volvieron a Bariloche, el lugar donde todo comenzó. Las montañas como testigos."
+  },
+  {
+    q: "¿Qué tiene en común la pareja como hobby?",
+    opts: ["Cocinar juntos", "Senderismo", "Fotografía", "Todas las anteriores"],
+    answer: 3,
+    fact: "Son una pareja de mil hobbies. Se conocieron haciendo fotos en una boda y cocinar es su ritual de cada domingo."
+  },
+  {
+    q: "¿Cuál es el plato favorito de Sofía que Andrés aprendió a cocinar?",
+    opts: ["Risotto de hongos", "Ravioles de ricota", "Tarta de manzana", "Tiramisu"],
+    answer: 1,
+    fact: "Los ravioles de ricota caseros son el gesto de amor más delicioso de Andrés."
+  },
+  {
+    q: "¿A qué país viajaron juntos por primera vez al exterior?",
+    opts: ["Italia", "Portugal", "Perú", "Japón"],
+    answer: 2,
+    fact: "Machu Picchu, el Titicaca y ceviche todos los días. Un viaje que los enamoró más."
+  },
+  {
+    q: "¿Cuál es la mascota de la pareja?",
+    opts: ["Un gato llamado Merlot", "Un perro llamado Tango", "Dos gatos", "No tienen mascotas"],
+    answer: 1,
+    fact: "Tango es el golden retriever que adoptaron juntos. Fue el primer gran paso de convivencia."
+  },
+  {
+    q: "¿Qué frase describe mejor el amor de Sofía y Andrés?",
+    opts: ["Amor a primera vista", "Amigos antes que novios", "Amor de película", "Todo lo anterior"],
+    answer: 3,
+    fact: "Empezaron como mejores amigos, se enamoraron como en las películas y se eligieron todos los días. Todo lo anterior."
+  }
+];
+
+let currentQ = 0, score = 0, answered = false;
+let shuffled = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startTrivia() {
+  currentQ = 0; score = 0; answered = false;
+  shuffled = shuffle(QUESTIONS);
+  showScreen('screenQuestion');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); }
+}
+
+function renderQuestion() {
+  const q = shuffled[currentQ];
+  const total = shuffled.length;
+
+  document.getElementById('progressText').textContent = `Pregunta ${currentQ+1} de ${total}`;
+  document.getElementById('progressBar').style.width = `${((currentQ+1)/total)*100}%`;
+  document.getElementById('questionNum').textContent = `${String(currentQ+1).padStart(2,'0')} / ${total}`;
+  document.getElementById('questionText').textContent = q.q;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectOption(i);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').classList.remove('show');
+  const btnNext = document.getElementById('btnNext');
+  btnNext.classList.remove('show');
+  btnNext.textContent = currentQ < shuffled.length - 1 ? 'Siguiente →' : 'Ver resultado →';
+  answered = false;
+}
+
+function selectOption(chosen) {
+  if (answered) return;
+  answered = true;
+
+  const q = shuffled[currentQ];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+
+  if (chosen === q.answer) {
+    score++;
+    opts[chosen].classList.add('correct');
+    document.getElementById('feedback').textContent = '✓ ¡Correcto! ' + q.fact;
+  } else {
+    opts[chosen].classList.add('wrong');
+    opts[q.answer].classList.add('reveal');
+    document.getElementById('feedback').textContent = '✗ ' + q.fact;
+  }
+
+  document.getElementById('feedback').classList.add('show');
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= shuffled.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('screenResult');
+
+  const total = shuffled.length;
+  const pct = score / total;
+
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultTotal').textContent = `DE ${total} CORRECTAS`;
+
+  let stars, msg, sub;
+  if (pct === 1) {
+    stars = '⭐⭐⭐⭐⭐';
+    msg = '¡Sos el/la mejor amigo/a que podrían tener!';
+    sub = 'Los conocés como si los hubieras vivido. Te esperamos en la fiesta para celebrar.';
+    launchConfetti();
+  } else if (pct >= 0.8) {
+    stars = '⭐⭐⭐⭐';
+    msg = '¡Sos parte de su historia sin dudarlo!';
+    sub = 'Casi perfecto. Claramente los querés mucho y se nota.';
+    launchConfetti();
+  } else if (pct >= 0.6) {
+    stars = '⭐⭐⭐';
+    msg = 'Buen puntaje, claramente los seguís de cerca.';
+    sub = 'Hay algunas historias pendientes de compartir en la fiesta.';
+  } else if (pct >= 0.4) {
+    stars = '⭐⭐';
+    msg = 'No está mal, pero hay secretos que no sabías.';
+    sub = 'La boda es la oportunidad perfecta para ponerse al día.';
+  } else {
+    stars = '⭐';
+    msg = '¡Mucho por aprender sobre los novios!';
+    sub = 'Eso sí... los querés igual. Y ellos a vos también.';
+  }
+
+  document.getElementById('resultStars').textContent = stars;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultSub').textContent = sub;
+}
+
+function restartTrivia() {
+  startTrivia();
+}
+
+function launchConfetti() {
+  const colors = ['#c9a84c','#e8c97a','#f0e6d3','#e8c4b8','#ffffff'];
+  for (let i = 0; i < 55; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.cssText = `
+        left:${Math.random()*100}vw;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        --cx:${(Math.random()-.5)*200}px;
+        --cr:${Math.random()*720-360}deg;
+        animation-delay:${Math.random()*0.8}s;
+        animation-duration:${2.5+Math.random()*1.5}s;
+        width:${5+Math.random()*7}px;
+        height:${5+Math.random()*7}px;
+        border-radius:${Math.random()>.5?'50%':'2px'};
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 4500);
+    }, i * 40);
+  }
+}
+</script>
+
+</body>
+</html>

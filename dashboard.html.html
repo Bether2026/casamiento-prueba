@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Control — Sofía & Andrés</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --champagne: #f0e6d3;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --ivory: #faf7f2;
+    --deep: #0d0905;
+    --ink: #2d2418;
+    --green: #5a9e7a;
+    --red: #b05a5a;
+    --amber: #c9913a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--deep); font-family: 'Montserrat', sans-serif; overflow-x: hidden; min-height: 100vh; }
+
+  /* ── LOGIN SCREEN ── */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--deep);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  #loginScreen.hide { opacity: 0; transform: scale(1.04); pointer-events: none; }
+  .login-mono { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--gold); opacity: 0.4; font-style: italic; margin-bottom: 0.3rem; }
+  .login-title { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em; color: var(--gold); margin-bottom: 0.5rem; opacity: 0.7; }
+  .login-subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; color: var(--champagne); opacity: 0.45; margin-bottom: 2.5rem; letter-spacing: 0.05em; }
+  .login-box { background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.18); border-radius: 3px; padding: 2.2rem 2.5rem; width: min(360px, 88vw); text-align: center; }
+  .login-label { font-family: 'Cinzel', serif; font-size: 0.52rem; letter-spacing: 0.44em; color: var(--gold); opacity: 0.65; margin-bottom: 1rem; display: block; }
+  .login-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,0.22); border-radius: 2px; padding: 0.75rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--champagne); text-align: center; letter-spacing: 0.3em; outline: none; transition: border-color 0.3s; }
+  .login-input:focus { border-color: rgba(201,168,76,0.55); }
+  .login-input::placeholder { color: rgba(240,230,211,0.2); letter-spacing: 0.2em; }
+  .login-btn { margin-top: 1.2rem; width: 100%; padding: 0.75rem; background: var(--gold); color: var(--deep); border: none; border-radius: 2px; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.3em; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+  .login-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .login-err { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.88rem; color: #c06060; margin-top: 0.8rem; opacity: 0; transition: opacity 0.3s; }
+  .login-err.vis { opacity: 1; }
+
+  /* ── CANVAS BG ── */
+  #bgCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; position: relative; z-index: 1; padding: 0 0 4rem; }
+  #dashboard.vis { display: block; animation: fadeUp 0.8s ease forwards; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* HEADER */
+  .dash-header {
+    background: linear-gradient(180deg, rgba(13,9,5,1) 0%, rgba(13,9,5,0.92) 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.14);
+    padding: 2rem clamp(1.5rem,5vw,3rem) 1.8rem;
+    text-align: center;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .dash-header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .dash-logo { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.9rem; color: var(--gold); opacity: 0.7; }
+  .dash-title-wrap { text-align: center; flex: 1; }
+  .dash-eyebrow { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.5em; color: var(--gold); opacity: 0.6; }
+  .dash-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem,3vw,2rem); color: var(--champagne); font-weight: 300; }
+  .dash-date { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.45); margin-top: 0.2rem; }
+  .logout-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.35); background: none; border: 1px solid rgba(201,168,76,0.14); border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; }
+  .logout-btn:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
+
+  /* STATS STRIP */
+  .stats-strip { max-width: 1200px; margin: 2.5rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  @media(max-width:700px){ .stats-strip { grid-template-columns: repeat(2,1fr); } }
+  .stat-card { background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.14); border-radius: 3px; padding: 1.4rem 1.2rem; text-align: center; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s; }
+  .stat-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-2px); }
+  .stat-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg,transparent,rgba(201,168,76,0.04),transparent); animation: shimmer 5s ease-in-out infinite; }
+  @keyframes shimmer { 0%{left:-100%} 100%{left:220%} }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.2rem); font-weight: 300; color: var(--champagne); line-height: 1; display: block; }
+  .stat-num.green { color: #7ec49a; }
+  .stat-num.red { color: #c48080; }
+  .stat-num.amber { color: var(--gold); }
+  .stat-lbl { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.5); margin-top: 0.4rem; display: block; }
+  .stat-icon { font-size: 1.1rem; display: block; margin-bottom: 0.5rem; opacity: 0.6; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { max-width: 1200px; margin: 1.8rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); }
+  .progress-label { display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.5); margin-bottom: 0.6rem; }
+  .progress-bar { height: 3px; background: rgba(201,168,76,0.1); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7ec49a, var(--gold)); border-radius: 2px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+
+  /* CONTROLS */
+  .table-controls { max-width: 1200px; margin: 2.5rem auto 1.2rem; padding: 0 clamp(1.5rem,5vw,3rem); display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; justify-content: space-between; }
+  .filter-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .filter-tab { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.3em; padding: 0.45rem 1rem; border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; background: transparent; color: rgba(240,230,211,0.45); cursor: pointer; transition: all 0.25s; }
+  .filter-tab:hover { border-color: rgba(201,168,76,0.45); color: var(--champagne); }
+  .filter-tab.active { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); }
+  .search-wrap { position: relative; }
+  .search-input { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,76,0.18); border-radius: 2px; padding: 0.45rem 1rem 0.45rem 2.2rem; font-family: 'Montserrat', sans-serif; font-size: 0.72rem; color: var(--champagne); outline: none; width: 200px; transition: border-color 0.3s; }
+  .search-input:focus { border-color: rgba(201,168,76,0.45); }
+  .search-input::placeholder { color: rgba(240,230,211,0.2); }
+  .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: rgba(201,168,76,0.35); pointer-events: none; }
+
+  /* TABLE */
+  .table-wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(1.5rem,5vw,3rem); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid rgba(201,168,76,0.16); }
+  th { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.5); padding: 0.8rem 1rem; text-align: left; font-weight: 400; white-space: nowrap; }
+  th:last-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid rgba(201,168,76,0.06); transition: background 0.2s; }
+  tbody tr:hover { background: rgba(201,168,76,0.03); }
+  td { padding: 0.85rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--champagne); vertical-align: middle; }
+  td.td-num { font-family: 'Cinzel', serif; font-size: 0.55rem; color: rgba(201,168,76,0.4); }
+  td.td-name { font-size: 1.05rem; }
+  td.td-table { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.2em; color: rgba(240,230,211,0.45); }
+  .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.22rem 0.7rem; border-radius: 20px; font-family: 'Cinzel', serif; font-size: 0.45rem; letter-spacing: 0.3em; white-space: nowrap; }
+  .badge-yes { background: rgba(126,196,154,0.12); color: #7ec49a; border: 1px solid rgba(126,196,154,0.25); }
+  .badge-no { background: rgba(196,128,128,0.12); color: #c48080; border: 1px solid rgba(196,128,128,0.25); }
+  .badge-pending { background: rgba(201,168,76,0.08); color: rgba(201,168,76,0.6); border: 1px solid rgba(201,168,76,0.18); }
+  .score-bar { display: flex; align-items: center; gap: 0.6rem; }
+  .score-mini { height: 3px; border-radius: 2px; background: rgba(201,168,76,0.1); flex: 1; min-width: 60px; overflow: hidden; }
+  .score-mini-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .score-val { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--gold); min-width: 36px; text-align: right; }
+  .no-score { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.82rem; color: rgba(240,230,211,0.2); }
+
+  /* GOLD RULE */
+  .gold-rule { width: 55px; height: 1px; margin: 0.8rem auto 0; background: linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent); }
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    th:nth-child(3), td:nth-child(3) { display: none; }
+    .search-input { width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-mono">S &amp; A</div>
+  <p class="login-title">PANEL DE CONTROL</p>
+  <p class="login-subtitle">Solo para los novios</p>
+  <div class="login-box">
+    <span class="login-label">CONTRASEÑA</span>
+    <input class="login-input" type="password" id="pwInput" placeholder="••••••" onkeydown="if(event.key==='Enter')checkLogin()">
+    <button class="login-btn" onclick="checkLogin()">INGRESAR</button>
+    <p class="login-err" id="loginErr">Contraseña incorrecta</p>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+
+  <header class="dash-header">
+    <div class="dash-header-inner">
+      <span class="dash-logo">S &amp; A</span>
+      <div class="dash-title-wrap">
+        <p class="dash-eyebrow">PANEL PRIVADO</p>
+        <h1 class="dash-heading">Lista de Invitados</h1>
+        <p class="dash-date">14 · 06 · 2025</p>
+      </div>
+      <button class="logout-btn" onclick="logout()">SALIR</button>
+    </div>
+  </header>
+
+  <div class="stats-strip">
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <span class="stat-num" id="statTotal">100</span>
+      <span class="stat-lbl">INVITADOS</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🥂</span>
+      <span class="stat-num green" id="statYes">0</span>
+      <span class="stat-lbl">CONFIRMAN</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🌿</span>
+      <span class="stat-num red" id="statNo">0</span>
+      <span class="stat-lbl">NO ASISTEN</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⏳</span>
+      <span class="stat-num amber" id="statPending">0</span>
+      <span class="stat-lbl">PENDIENTES</span>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>CONFIRMACIONES</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="table-controls">
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('all',this)">TODOS</button>
+      <button class="filter-tab" onclick="setFilter('yes',this)">CONFIRMAN</button>
+      <button class="filter-tab" onclick="setFilter('no',this)">NO ASISTEN</button>
+      <button class="filter-tab" onclick="setFilter('pending',this)">PENDIENTES</button>
+      <button class="filter-tab" onclick="setFilter('trivia',this)">CON TRIVIA</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="Buscar invitado..." oninput="filterSearch(this.value)" id="searchInput">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>NOMBRE</th>
+          <th>MESA</th>
+          <th>RSVP</th>
+          <th>TRIVIA</th>
+        </tr>
+      </thead>
+      <tbody id="guestTableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ═══ CANVAS BG ═══
+try {
+  const c = document.getElementById('bgCanvas');
+  const x = c.getContext('2d');
+  let W, H, t = 0;
+  const resize = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+  resize(); window.addEventListener('resize', resize);
+  const S = [];
+  for (let i = 0; i < 90; i++) S.push({ px:Math.random(), py:Math.random(), r:.28+Math.random()*.85, sp:.00005+Math.random()*.00012, ph:Math.random()*Math.PI*2, g:Math.random()>.72 });
+  function frame() {
+    t += .003; x.clearRect(0,0,W,H);
+    const bg = x.createRadialGradient(W*.5,H*.38,0,W*.5,H*.5,W*.9);
+    bg.addColorStop(0,'#1a1007'); bg.addColorStop(.55,'#0e0904'); bg.addColorStop(1,'rgba(4,3,1,0)');
+    x.fillStyle = bg; x.fillRect(0,0,W,H);
+    S.forEach(s => {
+      const px=((s.px+t*s.sp)%1)*W, py=s.py*H, tw=.38+.62*Math.sin(t*3.2+s.ph);
+      x.beginPath(); x.arc(px,py,s.r,0,Math.PI*2);
+      x.fillStyle=s.g?`rgba(232,201,120,${.45*tw})`:`rgba(255,250,242,${.35*tw})`; x.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+} catch(e) {}
+
+// ═══ LOGIN ═══
+const PASSWORD = 'sofia2025'; // Cambiar por la contraseña real
+
+function checkLogin() {
+  const val = document.getElementById('pwInput').value;
+  const err = document.getElementById('loginErr');
+  if (val === PASSWORD) {
+    document.getElementById('loginScreen').classList.add('hide');
+    setTimeout(() => {
+      document.getElementById('loginScreen').style.display = 'none';
+      const dash = document.getElementById('dashboard');
+      dash.style.display = 'block';
+      dash.classList.add('vis');
+      initDashboard();
+    }, 850);
+  } else {
+    err.classList.add('vis');
+    document.getElementById('pwInput').value = '';
+    setTimeout(() => err.classList.remove('vis'), 2500);
+  }
+}
+
+function logout() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('dashboard').classList.remove('vis');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginScreen').classList.remove('hide');
+  document.getElementById('pwInput').value = '';
+}
+
+// ═══ DATA — 100 invitados inventados ═══
+const guests = [
+  { id:1,  name:'Ana Sofía Ramírez',      table:1,  rsvp:'yes',     trivia:9  },
+  { id:2,  name:'Carlos Eduardo Villanueva', table:1, rsvp:'yes',   trivia:7  },
+  { id:3,  name:'María José Herrera',     table:1,  rsvp:'yes',     trivia:10 },
+  { id:4,  name:'Luis Antonio Mendoza',   table:1,  rsvp:'no',      trivia:null },
+  { id:5,  name:'Patricia Gómez de Ruiz', table:2,  rsvp:'yes',     trivia:6  },
+  { id:6,  name:'Roberto Alejandro Cruz', table:2,  rsvp:'yes',     trivia:8  },
+  { id:7,  name:'Isabella Torres Vega',   table:2,  rsvp:'pending', trivia:null },
+  { id:8,  name:'Fernando Castillo Luna', table:2,  rsvp:'yes',     trivia:5  },
+  { id:9,  name:'Valentina Ríos Mora',    table:3,  rsvp:'yes',     trivia:9  },
+  { id:10, name:'Alejandro Fuentes Díaz', table:3,  rsvp:'no',      trivia:null },
+  { id:11, name:'Camila Vargas Serrano',  table:3,  rsvp:'yes',     trivia:7  },
+  { id:12, name:'Diego Moreno Alarcón',   table:3,  rsvp:'pending', trivia:null },
+  { id:13, name:'Natalia Jiménez Peña',   table:4,  rsvp:'yes',     trivia:10 },
+  { id:14, name:'Andrés Felipe Rojas',    table:4,  rsvp:'yes',     trivia:8  },
+  { id:15, name:'Laura Beatriz Salinas',  table:4,  rsvp:'yes',     trivia:6  },
+  { id:16, name:'Martín Sebastián Leal',  table:4,  rsvp:'no',      trivia:null },
+  { id:17, name:'Gabriela Escobar Ruiz',  table:5,  rsvp:'yes',     trivia:9  },
+  { id:18, name:'Javier Hernández Mora',  table:5,  rsvp:'yes',     trivia:4  },
+  { id:19, name:'Lucía Fernández Bautista', table:5, rsvp:'pending', trivia:null },
+  { id:20, name:'Pablo Ernesto Gutiérrez', table:5, rsvp:'yes',     trivia:7  },
+  { id:21, name:'Daniela Portillo Vázquez', table:6, rsvp:'yes',    trivia:8  },
+  { id:22, name:'Ricardo Omar Navarro',   table:6,  rsvp:'yes',     trivia:6  },
+  { id:23, name:'Sofía Cristina Paredes', table:6,  rsvp:'no',      trivia:null },
+  { id:24, name:'Emilio Antonio Reyes',   table:6,  rsvp:'pending', trivia:null },
+  { id:25, name:'Carolina Beatriz Mejía', table:7,  rsvp:'yes',     trivia:9  },
+  { id:26, name:'Iván Alejandro Soto',    table:7,  rsvp:'yes',     trivia:5  },
+  { id:27, name:'Paola Cristina Aguilar', table:7,  rsvp:'yes',     trivia:10 },
+  { id:28, name:'Sergio Manuel Delgado',  table:7,  rsvp:'yes',     trivia:7  },
+  { id:29, name:'Diana Laura Espinoza',   table:8,  rsvp:'pending', trivia:null },
+  { id:30, name:'Manuel Eduardo Ochoa',   table:8,  rsvp:'yes',     trivia:8  },
+  { id:31, name:'Rebeca Alejandra Vega',  table:8,  rsvp:'yes',     trivia:6  },
+  { id:32, name:'Gustavo Adolfo Ramos',   table:8,  rsvp:'no',      trivia:null },
+  { id:33, name:'Francisca Torres Nieto', table:9,  rsvp:'yes',     trivia:9  },
+  { id:34, name:'Héctor Ignacio Medina',  table:9,  rsvp:'yes',     trivia:7  },
+  { id:35, name:'Susana Beatriz Ortega',  table:9,  rsvp:'pending', trivia:null },
+  { id:36, name:'Jorge Luis Madrigal',    table:9,  rsvp:'yes',     trivia:8  },
+  { id:37, name:'Claudia Inés Palacios',  table:10, rsvp:'yes',     trivia:5  },
+  { id:38, name:'Arturo Rafael Cabrera',  table:10, rsvp:'no',      trivia:null },
+  { id:39, name:'Mariana Guadalupe Ibarra', table:10, rsvp:'yes',   trivia:10 },
+  { id:40, name:'René Armando Pacheco',   table:10, rsvp:'pending', trivia:null },
+  { id:41, name:'Verónica Lorena Solís',  table:11, rsvp:'yes',     trivia:7  },
+  { id:42, name:'Oswaldo Enrique Castro', table:11, rsvp:'yes',     trivia:6  },
+  { id:43, name:'Beatriz Elena Contreras', table:11, rsvp:'yes',    trivia:9  },
+  { id:44, name:'Hugo César León',        table:11, rsvp:'pending', trivia:null },
+  { id:45, name:'Adriana Marcela Téllez', table:12, rsvp:'yes',     trivia:8  },
+  { id:46, name:'Óscar Ernesto Domínguez', table:12, rsvp:'yes',    trivia:4  },
+  { id:47, name:'Liliana Esperanza Flores', table:12, rsvp:'no',    trivia:null },
+  { id:48, name:'Raúl Humberto Miranda',  table:12, rsvp:'yes',     trivia:7  },
+  { id:49, name:'Yolanda Patricia Trujillo', table:1, rsvp:'yes',   trivia:6  },
+  { id:50, name:'Enrique Alfredo Suárez', table:1,  rsvp:'pending', trivia:null },
+  { id:51, name:'Norma Cecilia Sandoval', table:2,  rsvp:'yes',     trivia:9  },
+  { id:52, name:'Armando Jesús Guerrero', table:2,  rsvp:'yes',     trivia:8  },
+  { id:53, name:'Alicia Guadalupe Vargas', table:3, rsvp:'no',      trivia:null },
+  { id:54, name:'Ernesto Claudio Montoya', table:3, rsvp:'yes',     trivia:5  },
+  { id:55, name:'Irma Beatriz Lozano',    table:3,  rsvp:'yes',     trivia:7  },
+  { id:56, name:'Jesús Antonio Pedraza',  table:4,  rsvp:'pending', trivia:null },
+  { id:57, name:'Rosa Elena Núñez',       table:4,  rsvp:'yes',     trivia:10 },
+  { id:58, name:'Pedro Mauricio Barajas', table:4,  rsvp:'yes',     trivia:6  },
+  { id:59, name:'Aurora Silvia Muñoz',    table:5,  rsvp:'pending', trivia:null },
+  { id:60, name:'Tomás Eduardo Rosales',  table:5,  rsvp:'yes',     trivia:8  },
+  { id:61, name:'Concepción Ávila Pérez', table:5,  rsvp:'no',      trivia:null },
+  { id:62, name:'Bernardo Patricio Rangel', table:6, rsvp:'yes',    trivia:7  },
+  { id:63, name:'Estela Carmela Ibáñez',  table:6,  rsvp:'yes',     trivia:9  },
+  { id:64, name:'Víctor Manuel Cárdenas', table:6,  rsvp:'pending', trivia:null },
+  { id:65, name:'Dolores Graciela Pinto', table:7,  rsvp:'yes',     trivia:5  },
+  { id:66, name:'Nicolás Aurelio Salazar', table:7, rsvp:'yes',     trivia:8  },
+  { id:67, name:'Esperanza Dolores Vidal', table:7, rsvp:'no',      trivia:null },
+  { id:68, name:'Mauricio Andrés Quiroga', table:8, rsvp:'yes',     trivia:6  },
+  { id:69, name:'Marcela Eugenia Campos', table:8,  rsvp:'yes',     trivia:9  },
+  { id:70, name:'Santiago Rodrigo Blanco', table:8, rsvp:'pending', trivia:null },
+  { id:71, name:'Teresa Rosario Fuentes', table:9,  rsvp:'yes',     trivia:7  },
+  { id:72, name:'Felipe Augusto Montes',  table:9,  rsvp:'yes',     trivia:10 },
+  { id:73, name:'Jimena Rocío Valencia',  table:9,  rsvp:'yes',     trivia:8  },
+  { id:74, name:'Rodrigo Esteban Cortés', table:10, rsvp:'pending', trivia:null },
+  { id:75, name:'Pilar Cristina Aguirre', table:10, rsvp:'yes',     trivia:6  },
+  { id:76, name:'Alfonso Gerardo Meza',   table:10, rsvp:'yes',     trivia:5  },
+  { id:77, name:'Blanca Estela Romero',   table:11, rsvp:'no',      trivia:null },
+  { id:78, name:'Ignacio Benjamín Salas', table:11, rsvp:'yes',     trivia:9  },
+  { id:79, name:'Gloria Patricia Reina',  table:11, rsvp:'yes',     trivia:7  },
+  { id:80, name:'Leandro Nicolás Parra',  table:12, rsvp:'pending', trivia:null },
+  { id:81, name:'Cecilia Monserrat Arias', table:12, rsvp:'yes',    trivia:8  },
+  { id:82, name:'Rodrigo Maximiliano Nava', table:1, rsvp:'yes',    trivia:6  },
+  { id:83, name:'Sofía Fernanda Acosta',  table:1,  rsvp:'yes',     trivia:10 },
+  { id:84, name:'Alberto Rafael Cisneros', table:2, rsvp:'no',      trivia:null },
+  { id:85, name:'Melisa Andrea Quiroz',   table:2,  rsvp:'yes',     trivia:7  },
+  { id:86, name:'Gerardo Arturo Alvarado', table:3, rsvp:'pending', trivia:null },
+  { id:87, name:'Mónica Leticia Serrano', table:3,  rsvp:'yes',     trivia:8  },
+  { id:88, name:'Alejandra Paulina Bravo', table:4, rsvp:'yes',     trivia:9  },
+  { id:89, name:'Humberto César Téllez',  table:4,  rsvp:'yes',     trivia:5  },
+  { id:90, name:'Lorena Guadalupe Ojeda', table:5,  rsvp:'pending', trivia:null },
+  { id:91, name:'Rubén Darío Espinosa',   table:5,  rsvp:'yes',     trivia:7  },
+  { id:92, name:'Cristina Isabel Zamora', table:6,  rsvp:'yes',     trivia:9  },
+  { id:93, name:'Marco Antonio Valdivia', table:6,  rsvp:'yes',     trivia:6  },
+  { id:94, name:'Nadia Alejandra Lagos',  table:7,  rsvp:'no',      trivia:null },
+  { id:95, name:'Julián Eduardo Ríos',    table:7,  rsvp:'yes',     trivia:8  },
+  { id:96, name:'Vanesa Carolina Herrera', table:8, rsvp:'yes',     trivia:7  },
+  { id:97, name:'Maximiliano Renato Sosa', table:8, rsvp:'pending', trivia:null },
+  { id:98, name:'Graciela Noemí Briones', table:9,  rsvp:'yes',     trivia:10 },
+  { id:99, name:'Ernestina Rocío Zavala', table:10, rsvp:'yes',     trivia:6  },
+  { id:100,name:'Valentín Rodrigo Cerna', table:11, rsvp:'yes',     trivia:8  },
+];
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function initDashboard() {
+  updateStats();
+  renderTable();
+  setTimeout(() => {
+    const yes = guests.filter(g => g.rsvp === 'yes').length;
+    const pct = Math.round(yes / guests.length * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }, 300);
+}
+
+function updateStats() {
+  const yes = guests.filter(g => g.rsvp === 'yes').length;
+  const no  = guests.filter(g => g.rsvp === 'no').length;
+  const pending = guests.filter(g => g.rsvp === 'pending').length;
+  document.getElementById('statTotal').textContent = guests.length;
+  document.getElementById('statYes').textContent = yes;
+  document.getElementById('statNo').textContent = no;
+  document.getElementById('statPending').textContent = pending;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function filterSearch(val) {
+  currentSearch = val.toLowerCase();
+  renderTable();
+}
+
+function renderTable() {
+  let data = [...guests];
+
+  if (currentFilter === 'yes')     data = data.filter(g => g.rsvp === 'yes');
+  if (currentFilter === 'no')      data = data.filter(g => g.rsvp === 'no');
+  if (currentFilter === 'pending') data = data.filter(g => g.rsvp === 'pending');
+  if (currentFilter === 'trivia')  data = data.filter(g => g.trivia !== null);
+
+  if (currentSearch) {
+    data = data.filter(g => g.name.toLowerCase().includes(currentSearch));
+  }
+
+  const tbody = document.getElementById('guestTableBody');
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;font-style:italic;color:rgba(240,230,211,0.25);font-family:'Cormorant Garamond',serif">Sin resultados</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(g => {
+    const badge = g.rsvp === 'yes'
+      ? `<span class="badge badge-yes">✦ Confirma</span>`
+      : g.rsvp === 'no'
+      ? `<span class="badge badge-no">✕ No asiste</span>`
+      : `<span class="badge badge-pending">· Pendiente</span>`;
+
+    const scoreHtml = g.trivia !== null
+      ? `<div class="score-bar">
+           <div class="score-mini"><div class="score-mini-fill" style="width:${g.trivia * 10}%"></div></div>
+           <span class="score-val">${g.trivia}/10</span>
+         </div>`
+      : `<span class="no-score">—</span>`;
+
+    return `<tr>
+      <td class="td-num">${g.id}</td>
+      <td class="td-name">${g.name}</td>
+      <td class="td-table">MESA ${g.table}</td>
+      <td>${badge}</td>
+      <td>${scoreHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Enter key on login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none' && !document.getElementById('loginScreen').classList.contains('hide')) {
+    checkLogin();
+  }
+});
+</script>
+</body>
+</html>

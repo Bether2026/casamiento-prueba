@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesas — Sofía & Andrés</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --champagne: #f0e6d3;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --ivory: #faf7f2;
+  --deep: #0d0905;
+  --ink: #2d2418;
+  --green: #7ec49a;
+  --red: #c48080;
+  --amber: #c9913a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { background:var(--deep); font-family:'Montserrat',sans-serif; color:var(--champagne); }
+
+#bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── SCREENS ── */
+.screen { position:fixed; inset:0; z-index:1; display:none; flex-direction:column; }
+.screen.active { display:flex; animation:fadeUp 0.5s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── HEADER ── */
+.page-header {
+  background:rgba(13,9,5,0.95); border-bottom:1px solid rgba(201,168,76,0.14);
+  padding:0.85rem clamp(1rem,3.5vw,2.2rem);
+  display:flex; align-items:center; justify-content:space-between; gap:0.8rem;
+  flex-shrink:0; z-index:100; backdrop-filter:blur(14px);
+}
+.header-logo { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.5rem; color:var(--gold); opacity:0.6; }
+.header-center { text-align:center; flex:1; }
+.header-eyebrow { font-family:'Cinzel',serif; font-size:0.42rem; letter-spacing:0.48em; color:var(--gold); opacity:0.5; }
+.header-title { font-family:'Cormorant Garamond',serif; font-size:clamp(0.95rem,2vw,1.4rem); font-weight:300; }
+.back-btn { font-family:'Cinzel',serif; font-size:0.42rem; letter-spacing:0.28em; color:rgba(201,168,76,0.42); background:none; border:1px solid rgba(201,168,76,0.16); border-radius:2px; padding:0.35rem 0.8rem; cursor:pointer; transition:all 0.3s; white-space:nowrap; }
+.back-btn:hover { color:var(--gold); border-color:rgba(201,168,76,0.42); }
+
+/* ══════════════════ SCREEN 1 ══════════════════ */
+#screenConfig { overflow-y:auto; }
+.config-scroll { flex:1; overflow-y:auto; }
+.config-wrap { max-width:600px; margin:0 auto; padding:2.2rem clamp(1rem,4vw,2.2rem) 4rem; }
+.config-hero { text-align:center; margin-bottom:2.2rem; }
+.config-icon { font-size:1.9rem; display:block; margin-bottom:0.7rem; }
+.config-heading { font-family:'Cormorant Garamond',serif; font-size:clamp(1.5rem,3.2vw,2.1rem); font-weight:300; }
+.config-heading em { color:var(--gold); font-style:italic; }
+.config-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.9rem; color:rgba(240,230,211,0.38); margin-top:0.45rem; line-height:1.7; }
+
+.form-card { background:rgba(201,168,76,0.04); border:1px solid rgba(201,168,76,0.13); border-radius:4px; padding:1.6rem; margin-bottom:0.9rem; position:relative; overflow:hidden; }
+.form-card::after { content:''; position:absolute; top:0; left:-100%; width:40%; height:100%; background:linear-gradient(90deg,transparent,rgba(201,168,76,0.035),transparent); animation:shimmer 6s ease-in-out infinite; }
+@keyframes shimmer { 0%{left:-100%} 100%{left:220%} }
+.form-section-label { font-family:'Cinzel',serif; font-size:0.44rem; letter-spacing:0.44em; color:var(--gold); opacity:0.62; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.65rem; }
+.form-section-label::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(201,168,76,0.18),transparent); }
+.form-group { margin-bottom:1.2rem; }
+.form-group:last-child { margin-bottom:0; }
+.form-label { font-family:'Cinzel',serif; font-size:0.44rem; letter-spacing:0.34em; color:rgba(201,168,76,0.52); display:block; margin-bottom:0.48rem; }
+.form-input { width:100%; background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.17); border-radius:2px; padding:0.6rem 0.85rem; font-family:'Cormorant Garamond',serif; font-size:0.98rem; color:var(--champagne); outline:none; transition:border-color 0.3s; }
+.form-input:focus { border-color:rgba(201,168,76,0.46); }
+.form-input::placeholder { color:rgba(240,230,211,0.16); }
+.form-hint { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.76rem; color:rgba(240,230,211,0.26); margin-top:0.32rem; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; }
+@media(max-width:460px){ .form-row { grid-template-columns:1fr; } }
+
+.stepper { display:flex; align-items:center; border:1px solid rgba(201,168,76,0.19); border-radius:2px; overflow:hidden; width:fit-content; }
+.stepper-btn { width:38px; height:38px; background:rgba(201,168,76,0.06); border:none; color:var(--gold); font-size:1.05rem; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; justify-content:center; }
+.stepper-btn:hover { background:rgba(201,168,76,0.13); }
+.stepper-val { width:48px; background:transparent; border:none; border-left:1px solid rgba(201,168,76,0.13); border-right:1px solid rgba(201,168,76,0.13); color:var(--champagne); font-family:'Cormorant Garamond',serif; font-size:1.1rem; text-align:center; outline:none; padding:0.32rem 0; }
+
+.main-type-opts { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-top:0.45rem; }
+.opt-card { border:1px solid rgba(201,168,76,0.16); border-radius:3px; padding:0.85rem; text-align:center; cursor:pointer; transition:all 0.22s; }
+.opt-card:hover { border-color:rgba(201,168,76,0.36); background:rgba(201,168,76,0.05); }
+.opt-card.selected { border-color:var(--gold); background:rgba(201,168,76,0.08); }
+.opt-icon { font-size:1.2rem; display:block; margin-bottom:0.32rem; }
+.opt-label { font-family:'Cinzel',serif; font-size:0.44rem; letter-spacing:0.26em; }
+.opt-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.74rem; color:rgba(240,230,211,0.36); margin-top:0.14rem; }
+
+.submit-btn { width:100%; margin-top:1.6rem; padding:0.85rem; background:var(--gold); color:var(--deep); border:none; border-radius:2px; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.3em; cursor:pointer; transition:all 0.3s; }
+.submit-btn:hover { background:var(--gold-light); transform:translateY(-1px); box-shadow:0 8px 20px rgba(201,168,76,0.2); }
+
+/* ══════════════════ SCREEN 2 ══════════════════ */
+#screenPlanner { flex-direction:column; }
+.stats-strip { background:rgba(10,7,3,0.94); border-bottom:1px solid rgba(201,168,76,0.08); padding:0.5rem clamp(1rem,3vw,2rem); display:flex; gap:1.2rem; align-items:center; flex-shrink:0; }
+.st-item { display:flex; align-items:center; gap:0.38rem; }
+.st-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.st-dot.green { background:var(--green); }
+.st-dot.amber { background:var(--amber); }
+.st-dot.muted { background:rgba(240,230,211,0.35); }
+.st-val { font-family:'Cormorant Garamond',serif; font-size:1rem; line-height:1; }
+.st-lbl { font-family:'Cinzel',serif; font-size:0.36rem; letter-spacing:0.26em; color:rgba(201,168,76,0.38); }
+
+.planner-body { flex:1; position:relative; overflow:hidden; }
+
+/* FLOOR */
+.floor-wrap { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 44%, #1d1409 0%, #090602 100%); overflow:hidden; }
+.floor-canvas { position:absolute; inset:0; }
+
+/* DANCE FLOOR — draggable */
+#danceFloor {
+  position:absolute; cursor:grab; user-select:none; touch-action:none;
+  width:170px; height:115px; border:1px dashed rgba(201,168,76,0.2);
+  border-radius:6px; background:rgba(201,168,76,0.03);
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color 0.28s, box-shadow 0.28s;
+}
+#danceFloor:hover { border-color:rgba(201,168,76,0.36); box-shadow:0 0 24px rgba(201,168,76,0.05); }
+#danceFloor:active { cursor:grabbing; }
+.dance-label { font-family:'Cinzel',serif; font-size:0.34rem; letter-spacing:0.44em; color:rgba(201,168,76,0.26); text-align:center; line-height:2.1; pointer-events:none; }
+
+/* TABLE CHIP */
+.table-chip {
+  position:absolute; cursor:grab; user-select:none; touch-action:none;
+  display:flex; align-items:center; justify-content:center;
+}
+.table-chip:active { cursor:grabbing; z-index:50; }
+.table-circle {
+  border-radius:50%; border:2px solid rgba(201,168,76,0.28);
+  background:rgba(10,7,3,0.85);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative; z-index:1;
+  transition:border-color 0.22s, box-shadow 0.22s;
+  backdrop-filter:blur(6px);
+}
+.table-chip:hover .table-circle { border-color:rgba(201,168,76,0.58); box-shadow:0 0 20px rgba(201,168,76,0.13); }
+.table-chip.is-main .table-circle { border-color:rgba(201,168,76,0.52); }
+.table-chip.full .table-circle { border-color:rgba(126,196,154,0.44); }
+.t-num  { font-family:'Cinzel',serif; font-size:0.38rem; letter-spacing:0.28em; color:rgba(201,168,76,0.48); line-height:1; }
+.t-name { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.76rem; color:var(--champagne); text-align:center; line-height:1.2; max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:1px; }
+.table-chip.is-main .t-name { color:var(--gold); font-size:0.82rem; }
+.t-count { font-family:'Cinzel',serif; font-size:0.36rem; letter-spacing:0.18em; color:rgba(240,230,211,0.32); margin-top:2px; }
+.seat-ring { position:absolute; inset:0; pointer-events:none; }
+.seat-dot { position:absolute; width:8px; height:8px; border-radius:50%; border:1px solid rgba(201,168,76,0.2); background:transparent; transition:all 0.18s; }
+.seat-dot.taken      { background:rgba(201,168,76,0.36); border-color:rgba(201,168,76,0.62); }
+.seat-dot.taken-main { background:rgba(201,168,76,0.52); border-color:var(--gold); }
+
+/* FLOOR LEGEND */
+.floor-legend { position:absolute; bottom:0.85rem; left:0.85rem; display:flex; flex-direction:column; gap:0.35rem; pointer-events:none; }
+.legend-item { display:flex; align-items:center; gap:0.42rem; font-family:'Cinzel',serif; font-size:0.36rem; letter-spacing:0.26em; color:rgba(240,230,211,0.25); }
+.l-dot { width:7px; height:7px; border-radius:50%; border:1px solid; }
+.l-dot.empty   { border-color:rgba(201,168,76,0.28); }
+.l-dot.partial { border-color:rgba(201,168,76,0.52); background:rgba(201,168,76,0.18); }
+.l-dot.full-d  { border-color:rgba(126,196,154,0.46); background:rgba(126,196,154,0.14); }
+.floor-tip { position:absolute; top:0.7rem; left:50%; transform:translateX(-50%); background:rgba(10,7,3,0.76); border:1px solid rgba(201,168,76,0.14); border-radius:20px; padding:0.34rem 0.95rem; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.72rem; color:rgba(240,230,211,0.38); white-space:nowrap; pointer-events:none; backdrop-filter:blur(8px); }
+
+/* SAVE BAR */
+.save-bar { background:rgba(10,7,3,0.97); border-top:1px solid rgba(201,168,76,0.1); padding:0.6rem 1.3rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-shrink:0; backdrop-filter:blur(10px); }
+.save-info { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.8rem; color:rgba(240,230,211,0.35); }
+.save-btn { padding:0.46rem 1.5rem; background:var(--gold); color:var(--deep); border:none; border-radius:2px; font-family:'Cinzel',serif; font-size:0.48rem; letter-spacing:0.28em; cursor:pointer; transition:all 0.24s; }
+.save-btn:hover { background:var(--gold-light); }
+
+/* ══ TABLE POPUP ══ */
+#tablePopup {
+  position:fixed; z-index:500;
+  background:rgba(8,5,2,0.98); border:1px solid rgba(201,168,76,0.26);
+  border-radius:5px; width:295px;
+  box-shadow:0 18px 55px rgba(0,0,0,0.7); backdrop-filter:blur(16px);
+  display:none; flex-direction:column;
+  overflow:hidden;
+}
+#tablePopup.vis { display:flex; animation:popIn 0.18s ease forwards; }
+@keyframes popIn { from{opacity:0;transform:scale(0.93) translateY(5px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+.pp-header { padding:0.9rem 1rem 0.65rem; border-bottom:1px solid rgba(201,168,76,0.09); flex-shrink:0; }
+.pp-title-row { display:flex; align-items:center; justify-content:space-between; }
+.pp-title { font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.36em; color:var(--gold); }
+.pp-close { background:none; border:none; color:rgba(240,230,211,0.28); cursor:pointer; font-size:0.85rem; line-height:1; transition:color 0.2s; }
+.pp-close:hover { color:var(--champagne); }
+.pp-cap { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.8rem; color:rgba(240,230,211,0.36); margin-top:0.28rem; }
+.pp-bar { height:2px; background:rgba(201,168,76,0.09); border-radius:1px; margin-top:0.55rem; overflow:hidden; }
+.pp-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:1px; transition:width 0.35s ease; }
+
+/* Seated section */
+.pp-seated { padding:0.6rem 1rem; border-bottom:1px solid rgba(201,168,76,0.07); flex-shrink:0; max-height:148px; overflow-y:auto; }
+.pp-seated::-webkit-scrollbar { width:2px; }
+.pp-seated::-webkit-scrollbar-thumb { background:rgba(201,168,76,0.16); }
+.pp-section-lbl { font-family:'Cinzel',serif; font-size:0.38rem; letter-spacing:0.33em; color:rgba(201,168,76,0.38); margin-bottom:0.42rem; }
+.seated-row { display:flex; align-items:center; justify-content:space-between; padding:0.24rem 0; border-bottom:1px solid rgba(201,168,76,0.045); }
+.seated-row:last-child { border-bottom:none; }
+.seated-nm { font-family:'Cormorant Garamond',serif; font-size:0.86rem; }
+.seated-rm { background:none; border:none; color:rgba(196,128,128,0.38); cursor:pointer; font-size:0.7rem; padding:0.1rem 0.2rem; transition:color 0.2s; }
+.seated-rm:hover { color:var(--red); }
+.pp-empty-msg { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.8rem; color:rgba(240,230,211,0.18); padding:0.4rem 0; }
+
+/* Search section */
+.pp-search { padding:0.6rem 1rem; border-bottom:1px solid rgba(201,168,76,0.07); flex-shrink:0; }
+.pp-search-wrap { position:relative; }
+.pp-search-ico { position:absolute; left:0.58rem; top:50%; transform:translateY(-50%); font-size:0.62rem; color:rgba(201,168,76,0.28); pointer-events:none; }
+.pp-search-input { width:100%; background:rgba(255,255,255,0.03); border:1px solid rgba(201,168,76,0.16); border-radius:2px; padding:0.44rem 0.75rem 0.44rem 1.85rem; font-family:'Montserrat',sans-serif; font-size:0.68rem; color:var(--champagne); outline:none; transition:border-color 0.22s; }
+.pp-search-input:focus { border-color:rgba(201,168,76,0.4); }
+.pp-search-input::placeholder { color:rgba(240,230,211,0.16); font-size:0.65rem; }
+.pp-filter-row { display:flex; gap:0.32rem; margin-top:0.46rem; flex-wrap:wrap; }
+.pf-tab { font-family:'Cinzel',serif; font-size:0.36rem; letter-spacing:0.2em; padding:0.22rem 0.5rem; border:1px solid rgba(201,168,76,0.13); border-radius:20px; background:transparent; color:rgba(240,230,211,0.32); cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.pf-tab:hover { border-color:rgba(201,168,76,0.33); color:var(--champagne); }
+.pf-tab.active { background:rgba(201,168,76,0.09); border-color:var(--gold); color:var(--gold); }
+
+/* Candidates */
+.pp-candidates { flex:1; overflow-y:auto; min-height:70px; max-height:200px; }
+.pp-candidates::-webkit-scrollbar { width:2px; }
+.pp-candidates::-webkit-scrollbar-thumb { background:rgba(201,168,76,0.14); }
+.cand-item { display:flex; align-items:center; gap:0.55rem; padding:0.46rem 1rem; cursor:pointer; transition:background 0.14s; border-bottom:1px solid rgba(201,168,76,0.038); }
+.cand-item:hover { background:rgba(201,168,76,0.065); }
+.cand-av { width:24px; height:24px; border-radius:50%; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.18); display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:0.7rem; color:var(--gold); flex-shrink:0; }
+.cand-info { flex:1; min-width:0; }
+.cand-nm { font-family:'Cormorant Garamond',serif; font-size:0.86rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cand-sub { font-family:'Cinzel',serif; font-size:0.34rem; letter-spacing:0.2em; color:rgba(240,230,211,0.28); }
+.cand-rsvp { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.rsvp-yes { background:var(--green); }
+.rsvp-no  { background:var(--red); opacity:0.5; }
+.rsvp-pend { background:var(--amber); opacity:0.6; }
+.cand-add { background:rgba(201,168,76,0.09); border:1px solid rgba(201,168,76,0.22); border-radius:2px; color:var(--gold); font-size:0.78rem; padding:0.15rem 0.42rem; cursor:pointer; transition:all 0.18s; flex-shrink:0; }
+.cand-add:hover { background:rgba(201,168,76,0.18); border-color:var(--gold); }
+.pp-full-msg { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.83rem; color:rgba(126,196,154,0.58); padding:0.9rem 1rem; text-align:center; }
+.pp-no-res { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.8rem; color:rgba(240,230,211,0.18); padding:0.75rem 1rem; text-align:center; }
+
+/* TOAST */
+.toast { position:fixed; bottom:3.2rem; left:50%; transform:translateX(-50%) translateY(8px); z-index:900; background:rgba(10,7,3,0.96); border:1px solid rgba(201,168,76,0.22); border-radius:3px; padding:0.5rem 1.2rem; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:0.86rem; opacity:0; transition:all 0.28s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════ SCREEN 1 — CONFIG ════════════════ -->
+<div class="screen active" id="screenConfig">
+  <header class="page-header">
+    <span class="header-logo">S &amp; A</span>
+    <div class="header-center">
+      <p class="header-eyebrow">PANEL PRIVADO</p>
+      <h1 class="header-title">Acomodar Mesas</h1>
+    </div>
+    <button class="back-btn" onclick="history.back()">← VOLVER</button>
+  </header>
+  <div class="config-scroll">
+  <div class="config-wrap">
+    <div class="config-hero">
+      <span class="config-icon">🪑</span>
+      <h2 class="config-heading">Configurá el <em>salón</em></h2>
+      <p class="config-sub">Completá los datos y generamos el plano automáticamente.</p>
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-label">Mesa principal</p>
+      <div class="form-group">
+        <label class="form-label">¿CÓMO ESTÁ ORGANIZADA?</label>
+        <div class="main-type-opts" id="mainTypeOpts">
+          <div class="opt-card selected" data-val="solo" onclick="selectMainType(this)">
+            <span class="opt-icon">💑</span>
+            <span class="opt-label">SOLO NOVIOS</span>
+            <span class="opt-sub">Andrés & Sofía</span>
+          </div>
+          <div class="opt-card" data-val="family" onclick="selectMainType(this)">
+            <span class="opt-icon">👨‍👩‍👧‍👦</span>
+            <span class="opt-label">NOVIOS + FAMILIA</span>
+            <span class="opt-sub">Padres e íntimos</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CAPACIDAD MESA PRINCIPAL</label>
+        <div class="stepper">
+          <button class="stepper-btn" onclick="step('mainCap',-1)">−</button>
+          <input class="stepper-val" id="mainCap" type="number" value="2" min="2" max="20" readonly>
+          <button class="stepper-btn" onclick="step('mainCap',1)">+</button>
+        </div>
+        <p class="form-hint">Contando a los novios</p>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-label">Mesas de invitados</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CANTIDAD DE MESAS</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="step('tableCount',-1)">−</button>
+            <input class="stepper-val" id="tableCount" type="number" value="8" min="1" max="30" readonly>
+            <button class="stepper-btn" onclick="step('tableCount',1)">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ASIENTOS POR MESA</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="step('seatsPerTable',-1)">−</button>
+            <input class="stepper-val" id="seatsPerTable" type="number" value="10" min="4" max="20" readonly>
+            <button class="stepper-btn" onclick="step('seatsPerTable',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NOMBRES PARA LAS MESAS <span style="opacity:0.38">(opcional)</span></label>
+        <input class="form-input" id="tableNamesInput" placeholder="Ej: Rosas, Jazmines, Lavanda..." type="text">
+        <p class="form-hint">Separados por coma — si dejás vacío se numeran solas</p>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-label">Salón</p>
+      <div class="form-group">
+        <label class="form-label">NOMBRE DEL SALÓN <span style="opacity:0.38">(opcional)</span></label>
+        <input class="form-input" id="venueNameInput" placeholder="Ej: Hacienda Villa Real" type="text">
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="generatePlan()">✦ &nbsp;GENERAR PLANO DE MESAS &nbsp;✦</button>
+  </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN 2 — PLANO ════════════════ -->
+<div class="screen" id="screenPlanner">
+  <header class="page-header">
+    <span class="header-logo">S &amp; A</span>
+    <div class="header-center">
+      <p class="header-eyebrow" id="venueLabelHeader">SALÓN</p>
+      <h1 class="header-title">Plano de Mesas</h1>
+    </div>
+    <button class="back-btn" onclick="showScreen('screenConfig')">← RECONFIGURAR</button>
+  </header>
+
+  <div class="stats-strip">
+    <div class="st-item"><div class="st-dot muted"></div><span class="st-val" id="stTotal">100</span>&nbsp;<span class="st-lbl">TOTAL</span></div>
+    <div class="st-item"><div class="st-dot green"></div><span class="st-val" id="stAssigned">0</span>&nbsp;<span class="st-lbl">ASIGNADOS</span></div>
+    <div class="st-item"><div class="st-dot amber"></div><span class="st-val" id="stPending">100</span>&nbsp;<span class="st-lbl">SIN MESA</span></div>
+  </div>
+
+  <div class="planner-body">
+    <div class="floor-wrap">
+      <div class="floor-canvas" id="floorCanvas">
+        <div id="danceFloor">
+          <div class="dance-label">PISTA<br>DE BAILE</div>
+        </div>
+      </div>
+      <div class="floor-legend">
+        <div class="legend-item"><div class="l-dot empty"></div>DISPONIBLE</div>
+        <div class="legend-item"><div class="l-dot partial"></div>CON INVITADOS</div>
+        <div class="legend-item"><div class="l-dot full-d"></div>COMPLETA</div>
+      </div>
+      <div class="floor-tip">Arrastrá las mesas y la pista · Tocá una mesa para asignar</div>
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div id="tablePopup">
+    <div class="pp-header">
+      <div class="pp-title-row">
+        <span class="pp-title" id="ppTitle">MESA</span>
+        <button class="pp-close" onclick="closePopup()">✕</button>
+      </div>
+      <p class="pp-cap" id="ppCap"></p>
+      <div class="pp-bar"><div class="pp-bar-fill" id="ppBarFill" style="width:0%"></div></div>
+    </div>
+    <div class="pp-seated" id="ppSeated">
+      <p class="pp-section-lbl">SENTADOS EN ESTA MESA</p>
+      <div id="ppSeatedList"></div>
+    </div>
+    <div class="pp-search">
+      <p class="pp-section-lbl">AGREGAR INVITADO</p>
+      <div class="pp-search-wrap">
+        <span class="pp-search-ico">🔍</span>
+        <input class="pp-search-input" id="ppSearchInput" type="text" placeholder="Buscar por nombre..." oninput="renderCandidates()">
+      </div>
+      <div class="pp-filter-row">
+        <button class="pf-tab active" onclick="setPfFilter('all',this)">TODOS</button>
+        <button class="pf-tab" onclick="setPfFilter('yes',this)">CONFIRMAN</button>
+        <button class="pf-tab" onclick="setPfFilter('pending',this)">PENDIENTE</button>
+      </div>
+    </div>
+    <div class="pp-candidates" id="ppCandidates"></div>
+  </div>
+
+  <div class="save-bar">
+    <span class="save-info" id="saveInfo">Tocá una mesa para empezar ✦</span>
+    <button class="save-btn" onclick="saveLayout()">💾 &nbsp;GUARDAR</button>
+  </div>
+</div>
+
+<script>
+/* ══ CANVAS BG ══ */
+(()=>{
+  const c=document.getElementById('bgCanvas'),x=c.getContext('2d');
+  let W,H,t=0;
+  const r=()=>{W=c.width=innerWidth;H=c.height=innerHeight;};
+  r();window.addEventListener('resize',r);
+  const S=[];
+  for(let i=0;i<75;i++) S.push({px:Math.random(),py:Math.random(),r:.18+Math.random()*.6,sp:.00003+Math.random()*.00009,ph:Math.random()*Math.PI*2,g:Math.random()>.72});
+  (function fr(){
+    t+=.003;x.clearRect(0,0,W,H);
+    const bg=x.createRadialGradient(W*.5,H*.4,0,W*.5,H*.5,W*.9);
+    bg.addColorStop(0,'#1a1007');bg.addColorStop(.6,'#0e0904');bg.addColorStop(1,'rgba(4,3,1,0)');
+    x.fillStyle=bg;x.fillRect(0,0,W,H);
+    S.forEach(s=>{
+      const px=((s.px+t*s.sp)%1)*W,py=s.py*H,tw=.38+.62*Math.sin(t*3+s.ph);
+      x.beginPath();x.arc(px,py,s.r,0,Math.PI*2);
+      x.fillStyle=s.g?`rgba(232,201,120,${.36*tw})`:`rgba(255,250,242,${.28*tw})`;x.fill();
+    });
+    requestAnimationFrame(fr);
+  })();
+})();
+
+/* ══ DATA ══ */
+const ALL_GUESTS=[
+  {id:1,  name:'Ana Sofía Ramírez',         rsvp:'yes'},  {id:2,  name:'Carlos Eduardo Villanueva', rsvp:'yes'},
+  {id:3,  name:'María José Herrera',         rsvp:'yes'},  {id:4,  name:'Luis Antonio Mendoza',      rsvp:'no'},
+  {id:5,  name:'Patricia Gómez de Ruiz',     rsvp:'yes'},  {id:6,  name:'Roberto Alejandro Cruz',    rsvp:'yes'},
+  {id:7,  name:'Isabella Torres Vega',       rsvp:'pending'},{id:8, name:'Fernando Castillo Luna',   rsvp:'yes'},
+  {id:9,  name:'Valentina Ríos Mora',        rsvp:'yes'},  {id:10, name:'Alejandro Fuentes Díaz',    rsvp:'no'},
+  {id:11, name:'Camila Vargas Serrano',      rsvp:'yes'},  {id:12, name:'Diego Moreno Alarcón',      rsvp:'pending'},
+  {id:13, name:'Natalia Jiménez Peña',       rsvp:'yes'},  {id:14, name:'Andrés Felipe Rojas',       rsvp:'yes'},
+  {id:15, name:'Laura Beatriz Salinas',      rsvp:'yes'},  {id:16, name:'Martín Sebastián Leal',     rsvp:'no'},
+  {id:17, name:'Gabriela Escobar Ruiz',      rsvp:'yes'},  {id:18, name:'Javier Hernández Mora',     rsvp:'yes'},
+  {id:19, name:'Lucía Fernández Bautista',   rsvp:'pending'},{id:20,name:'Pablo Ernesto Gutiérrez',  rsvp:'yes'},
+  {id:21, name:'Daniela Portillo Vázquez',   rsvp:'yes'},  {id:22, name:'Ricardo Omar Navarro',      rsvp:'yes'},
+  {id:23, name:'Sofía Cristina Paredes',     rsvp:'no'},   {id:24, name:'Emilio Antonio Reyes',      rsvp:'pending'},
+  {id:25, name:'Carolina Beatriz Mejía',     rsvp:'yes'},  {id:26, name:'Iván Alejandro Soto',       rsvp:'yes'},
+  {id:27, name:'Paola Cristina Aguilar',     rsvp:'yes'},  {id:28, name:'Sergio Manuel Delgado',     rsvp:'yes'},
+  {id:29, name:'Diana Laura Espinoza',       rsvp:'pending'},{id:30,name:'Manuel Eduardo Ochoa',     rsvp:'yes'},
+  {id:31, name:'Rebeca Alejandra Vega',      rsvp:'yes'},  {id:32, name:'Gustavo Adolfo Ramos',      rsvp:'no'},
+  {id:33, name:'Francisca Torres Nieto',     rsvp:'yes'},  {id:34, name:'Héctor Ignacio Medina',     rsvp:'yes'},
+  {id:35, name:'Susana Beatriz Ortega',      rsvp:'pending'},{id:36,name:'Jorge Luis Madrigal',      rsvp:'yes'},
+  {id:37, name:'Claudia Inés Palacios',      rsvp:'yes'},  {id:38, name:'Arturo Rafael Cabrera',     rsvp:'no'},
+  {id:39, name:'Mariana Guadalupe Ibarra',   rsvp:'yes'},  {id:40, name:'René Armando Pacheco',      rsvp:'pending'},
+  {id:41, name:'Verónica Lorena Solís',      rsvp:'yes'},  {id:42, name:'Oswaldo Enrique Castro',    rsvp:'yes'},
+  {id:43, name:'Beatriz Elena Contreras',    rsvp:'yes'},  {id:44, name:'Hugo César León',           rsvp:'pending'},
+  {id:45, name:'Adriana Marcela Téllez',     rsvp:'yes'},  {id:46, name:'Óscar Ernesto Domínguez',   rsvp:'yes'},
+  {id:47, name:'Liliana Esperanza Flores',   rsvp:'no'},   {id:48, name:'Raúl Humberto Miranda',     rsvp:'yes'},
+  {id:49, name:'Yolanda Patricia Trujillo',  rsvp:'yes'},  {id:50, name:'Enrique Alfredo Suárez',    rsvp:'pending'},
+  {id:51, name:'Norma Cecilia Sandoval',     rsvp:'yes'},  {id:52, name:'Armando Jesús Guerrero',    rsvp:'yes'},
+  {id:53, name:'Alicia Guadalupe Vargas',    rsvp:'no'},   {id:54, name:'Ernesto Claudio Montoya',   rsvp:'yes'},
+  {id:55, name:'Irma Beatriz Lozano',        rsvp:'yes'},  {id:56, name:'Jesús Antonio Pedraza',     rsvp:'pending'},
+  {id:57, name:'Rosa Elena Núñez',           rsvp:'yes'},  {id:58, name:'Pedro Mauricio Barajas',    rsvp:'yes'},
+  {id:59, name:'Aurora Silvia Muñoz',        rsvp:'pending'},{id:60,name:'Tomás Eduardo Rosales',    rsvp:'yes'},
+  {id:61, name:'Concepción Ávila Pérez',     rsvp:'no'},   {id:62, name:'Bernardo Patricio Rangel',  rsvp:'yes'},
+  {id:63, name:'Estela Carmela Ibáñez',      rsvp:'yes'},  {id:64, name:'Víctor Manuel Cárdenas',    rsvp:'pending'},
+  {id:65, name:'Dolores Graciela Pinto',     rsvp:'yes'},  {id:66, name:'Nicolás Aurelio Salazar',   rsvp:'yes'},
+  {id:67, name:'Esperanza Dolores Vidal',    rsvp:'no'},   {id:68, name:'Mauricio Andrés Quiroga',   rsvp:'yes'},
+  {id:69, name:'Marcela Eugenia Campos',     rsvp:'yes'},  {id:70, name:'Santiago Rodrigo Blanco',   rsvp:'pending'},
+  {id:71, name:'Teresa Rosario Fuentes',     rsvp:'yes'},  {id:72, name:'Felipe Augusto Montes',     rsvp:'yes'},
+  {id:73, name:'Jimena Rocío Valencia',      rsvp:'yes'},  {id:74, name:'Rodrigo Esteban Cortés',    rsvp:'pending'},
+  {id:75, name:'Pilar Cristina Aguirre',     rsvp:'yes'},  {id:76, name:'Alfonso Gerardo Meza',      rsvp:'yes'},
+  {id:77, name:'Blanca Estela Romero',       rsvp:'no'},   {id:78, name:'Ignacio Benjamín Salas',    rsvp:'yes'},
+  {id:79, name:'Gloria Patricia Reina',      rsvp:'yes'},  {id:80, name:'Leandro Nicolás Parra',     rsvp:'pending'},
+  {id:81, name:'Cecilia Monserrat Arias',    rsvp:'yes'},  {id:82, name:'Rodrigo Maximiliano Nava',  rsvp:'yes'},
+  {id:83, name:'Sofía Fernanda Acosta',      rsvp:'yes'},  {id:84, name:'Alberto Rafael Cisneros',   rsvp:'no'},
+  {id:85, name:'Melisa Andrea Quiroz',       rsvp:'yes'},  {id:86, name:'Gerardo Arturo Alvarado',   rsvp:'pending'},
+  {id:87, name:'Mónica Leticia Serrano',     rsvp:'yes'},  {id:88, name:'Alejandra Paulina Bravo',   rsvp:'yes'},
+  {id:89, name:'Humberto César Téllez',      rsvp:'yes'},  {id:90, name:'Lorena Guadalupe Ojeda',    rsvp:'pending'},
+  {id:91, name:'Rubén Darío Espinosa',       rsvp:'yes'},  {id:92, name:'Cristina Isabel Zamora',    rsvp:'yes'},
+  {id:93, name:'Marco Antonio Valdivia',     rsvp:'yes'},  {id:94, name:'Nadia Alejandra Lagos',     rsvp:'no'},
+  {id:95, name:'Julián Eduardo Ríos',        rsvp:'yes'},  {id:96, name:'Vanesa Carolina Herrera',   rsvp:'yes'},
+  {id:97, name:'Maximiliano Renato Sosa',    rsvp:'pending'},{id:98,name:'Graciela Noemí Briones',   rsvp:'yes'},
+  {id:99, name:'Ernestina Rocío Zavala',     rsvp:'yes'},  {id:100,name:'Valentín Rodrigo Cerna',    rsvp:'yes'},
+];
+
+/* ══ STATE ══ */
+let tables=[], activeTableId=null, pfFilter='all', pfSearch='';
+
+/* ══ CONFIG HELPERS ══ */
+function step(id,d){ const e=document.getElementById(id); e.value=Math.min(+e.max,Math.max(+e.min,+e.value+d)); }
+function selectMainType(card){
+  document.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  if(card.dataset.val==='solo') document.getElementById('mainCap').value=2;
+}
+
+/* ══ GENERATE ══ */
+function generatePlan(){
+  const mainType=document.querySelector('.opt-card.selected').dataset.val;
+  const mainCap=+document.getElementById('mainCap').value;
+  const tableCount=+document.getElementById('tableCount').value;
+  const seats=+document.getElementById('seatsPerTable').value;
+  const raw=document.getElementById('tableNamesInput').value.trim();
+  const venue=document.getElementById('venueNameInput').value.trim()||'Salón Principal';
+  const names=raw?raw.split(',').map(n=>n.trim()).filter(Boolean):[];
+  document.getElementById('venueLabelHeader').textContent=venue.toUpperCase();
+  tables=[];
+  tables.push({id:'main',name:mainType==='solo'?'Sofía & Andrés':'Mesa Principal',capacity:mainCap,guests:[],isMain:true,x:0,y:0});
+  for(let i=0;i<tableCount;i++) tables.push({id:i+1,name:names[i]||`Mesa ${i+1}`,capacity:seats,guests:[],isMain:false,x:0,y:0});
+  showScreen('screenPlanner');
+  requestAnimationFrame(()=>requestAnimationFrame(layoutTables));
+}
+
+/* ══ LAYOUT ══ */
+function layoutTables(){
+  const wrap=document.querySelector('.floor-wrap');
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+
+  // Dance floor — center
+  const df=document.getElementById('danceFloor');
+  df.style.left=(W/2-85)+'px'; df.style.top=(H/2-57)+'px';
+
+  // Main table — top center
+  const mt=tables.find(t=>t.isMain);
+  mt.x=W/2-46; mt.y=36;
+
+  // Guest tables in ellipse ring
+  const gs=tables.filter(t=>!t.isMain);
+  const n=gs.length;
+  const rx=Math.min(W*0.42, (W-200)/2);
+  const ry=Math.min(H*0.36, (H-200)/2);
+  const cx=W/2, cy=H/2;
+  gs.forEach((t,i)=>{
+    const a=(i/n)*Math.PI*2-Math.PI*0.5;
+    t.x=Math.max(8,Math.min(W-96, cx+rx*Math.cos(a)-40));
+    t.y=Math.max(90,Math.min(H-86, cy+ry*Math.sin(a)-40));
+  });
+
+  renderFloor();
+  updateStats();
+}
+
+/* ══ RENDER FLOOR ══ */
+function renderFloor(){
+  const canvas=document.getElementById('floorCanvas');
+  canvas.querySelectorAll('.table-chip').forEach(e=>e.remove());
+  tables.forEach(t=>createChip(t,canvas));
+  makeDraggable(document.getElementById('danceFloor'),null);
+}
+
+/* ══ CHIP ══ */
+function createChip(t,canvas){
+  const sz=t.isMain?82:66;
+  const rim=sz+28;
+  const chip=document.createElement('div');
+  chip.className='table-chip'+(t.isMain?' is-main':'');
+  chip.id='chip-'+t.id;
+  chip.style.cssText=`left:${t.x}px;top:${t.y}px;width:${rim}px;height:${rim}px;`;
+  chip.innerHTML=`
+    <div class="seat-ring" id="sr-${t.id}" style="width:${rim}px;height:${rim}px;position:absolute;top:0;left:0;border-radius:50%;"></div>
+    <div class="table-circle" style="width:${sz}px;height:${sz}px;position:relative;z-index:1;">
+      <span class="t-num">${t.isMain?'★':`#${t.id}`}</span>
+      <span class="t-name">${t.name}</span>
+      <span class="t-count" id="tc-${t.id}">0/${t.capacity}</span>
+    </div>`;
+  chip.addEventListener('click',e=>{ if(!chip._dragged){ e.stopPropagation(); openPopup(t.id,chip); }});
+  makeDraggable(chip,t);
+  canvas.appendChild(chip);
+  refreshChip(t);
+}
+
+function refreshChip(t){
+  renderSeats(t);
+  const el=document.getElementById('tc-'+t.id);
+  if(el) el.textContent=t.guests.length+'/'+t.capacity;
+  const ch=document.getElementById('chip-'+t.id);
+  if(ch) ch.classList.toggle('full',t.guests.length>=t.capacity);
+}
+
+function renderSeats(t){
+  const ring=document.getElementById('sr-'+t.id); if(!ring) return;
+  ring.innerHTML='';
+  const sz=t.isMain?82:66, rim=sz+28, r=rim/2-5;
+  for(let i=0;i<t.capacity;i++){
+    const a=(i/t.capacity)*Math.PI*2-Math.PI/2;
+    const d=document.createElement('div');
+    d.className='seat-dot'+(i<t.guests.length?(t.isMain?' taken-main':' taken'):'');
+    d.style.left=(rim/2+r*Math.cos(a)-4)+'px';
+    d.style.top=(rim/2+r*Math.sin(a)-4)+'px';
+    ring.appendChild(d);
+  }
+}
+
+/* ══ DRAG ══ */
+function makeDraggable(el,tableObj){
+  let sx,sy,ox,oy,moved=false;
+  function down(e){
+    moved=false; el._dragged=false;
+    const p=e.touches?e.touches[0]:e;
+    sx=p.clientX; sy=p.clientY;
+    ox=tableObj?tableObj.x:parseInt(el.style.left||0);
+    oy=tableObj?tableObj.y:parseInt(el.style.top||0);
+    function move(ev){
+      const p2=ev.touches?ev.touches[0]:ev;
+      const dx=p2.clientX-sx, dy=p2.clientY-sy;
+      if(!moved&&Math.hypot(dx,dy)>5){moved=true;el._dragged=true;closePopup();}
+      if(!moved) return;
+      const wrap=document.querySelector('.floor-wrap');
+      const W=wrap.clientWidth,H=wrap.clientHeight;
+      const nx=Math.max(0,Math.min(W-el.offsetWidth,ox+dx));
+      const ny=Math.max(0,Math.min(H-el.offsetHeight,oy+dy));
+      el.style.left=nx+'px'; el.style.top=ny+'px';
+      if(tableObj){tableObj.x=nx;tableObj.y=ny;}
+    }
+    function up(){
+      document.removeEventListener('mousemove',move);
+      document.removeEventListener('touchmove',move);
+      document.removeEventListener('mouseup',up);
+      document.removeEventListener('touchend',up);
+      setTimeout(()=>{el._dragged=false;},50);
+    }
+    document.addEventListener('mousemove',move);
+    document.addEventListener('touchmove',move,{passive:true});
+    document.addEventListener('mouseup',up);
+    document.addEventListener('touchend',up);
+  }
+  el.addEventListener('mousedown',down);
+  el.addEventListener('touchstart',down,{passive:true});
+}
+
+/* ══ POPUP ══ */
+function openPopup(tableId,chipEl){
+  activeTableId=tableId;
+  const t=tables.find(x=>x.id===tableId); if(!t) return;
+  document.getElementById('ppTitle').textContent=t.isMain?'★ '+t.name.toUpperCase():t.name.toUpperCase();
+  document.getElementById('ppCap').textContent=t.guests.length+' de '+t.capacity+' asientos ocupados';
+  const pct=t.capacity?Math.round(t.guests.length/t.capacity*100):0;
+  document.getElementById('ppBarFill').style.width=pct+'%';
+  renderSeatedList(t);
+  pfFilter='all'; pfSearch='';
+  document.getElementById('ppSearchInput').value='';
+  document.querySelectorAll('.pf-tab').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='TODOS'));
+  renderCandidates();
+  const popup=document.getElementById('tablePopup');
+  popup.classList.add('vis');
+  positionPopup(chipEl||document.getElementById('chip-'+tableId));
+}
+
+function positionPopup(chipEl){
+  const popup=document.getElementById('tablePopup');
+  const PW=295, margin=10, headerH=60;
+  const maxH=window.innerHeight-headerH-margin*2;
+  popup.style.maxHeight=maxH+'px';
+  const rect=chipEl.getBoundingClientRect();
+  let left=rect.right+margin;
+  let top=rect.top;
+  if(left+PW>window.innerWidth-margin) left=rect.left-PW-margin;
+  if(left<margin) left=margin;
+  const PH=Math.min(popup.scrollHeight||420, maxH);
+  if(top+PH>window.innerHeight-margin) top=window.innerHeight-PH-margin;
+  if(top<headerH) top=headerH;
+  popup.style.left=left+'px';
+  popup.style.top=top+'px';
+}
+
+function closePopup(){
+  document.getElementById('tablePopup').classList.remove('vis');
+  activeTableId=null;
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#tablePopup')&&!e.target.closest('.table-chip')) closePopup();
+});
+
+/* ══ SEATED ══ */
+function renderSeatedList(t){
+  const list=document.getElementById('ppSeatedList');
+  if(!t.guests.length){ list.innerHTML='<p class="pp-empty-msg">Aún no hay nadie sentado aquí.</p>'; return; }
+  list.innerHTML=t.guests.map(gid=>{
+    const g=ALL_GUESTS.find(x=>x.id===gid);
+    return `<div class="seated-row">
+      <span class="seated-nm">${g?g.name:'?'}</span>
+      <button class="seated-rm" onclick="removeSeat(${JSON.stringify(t.id)},${gid})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removeSeat(tableId,guestId){
+  const t=tables.find(x=>x.id===tableId); if(!t) return;
+  t.guests=t.guests.filter(id=>id!==guestId);
+  refreshChip(t); updateStats();
+  const g=ALL_GUESTS.find(x=>x.id===guestId);
+  showToast((g?g.name:'Invitado')+' quitado de '+t.name);
+  openPopup(tableId,document.getElementById('chip-'+tableId));
+}
+
+/* ══ CANDIDATES ══ */
+function setPfFilter(f,btn){
+  pfFilter=f;
+  document.querySelectorAll('.pf-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCandidates();
+}
+
+function renderCandidates(){
+  pfSearch=(document.getElementById('ppSearchInput').value||'').toLowerCase().trim();
+  const t=tables.find(x=>x.id===activeTableId);
+  const cand=document.getElementById('ppCandidates'); if(!t) return;
+  const isFull=t.guests.length>=t.capacity;
+  if(isFull){ cand.innerHTML='<p class="pp-full-msg">✓ Mesa completa — todos los asientos ocupados</p>'; return; }
+  let list=ALL_GUESTS.filter(g=>!isAssigned(g.id));
+  if(pfFilter==='yes')     list=list.filter(g=>g.rsvp==='yes');
+  if(pfFilter==='pending') list=list.filter(g=>g.rsvp==='pending');
+  if(pfSearch) list=list.filter(g=>g.name.toLowerCase().includes(pfSearch));
+  if(!list.length){ cand.innerHTML='<p class="pp-no-res">Sin resultados</p>'; return; }
+  cand.innerHTML=list.map(g=>{
+    const ini=g.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+    const rc=g.rsvp==='yes'?'rsvp-yes':g.rsvp==='no'?'rsvp-no':'rsvp-pend';
+    return `<div class="cand-item" onclick="assignGuest(${g.id})">
+      <div class="cand-av">${ini}</div>
+      <div class="cand-info">
+        <div class="cand-nm">${g.name}</div>
+        <div class="cand-sub">${g.rsvp==='yes'?'CONFIRMA':g.rsvp==='no'?'NO ASISTE':'PENDIENTE'}</div>
+      </div>
+      <div class="cand-rsvp ${rc}"></div>
+      <button class="cand-add" onclick="event.stopPropagation();assignGuest(${g.id})">+</button>
+    </div>`;
+  }).join('');
+}
+
+function isAssigned(gid){ return tables.some(t=>t.guests.includes(gid)); }
+
+function assignGuest(gid){
+  const t=tables.find(x=>x.id===activeTableId); if(!t||t.guests.length>=t.capacity) return;
+  tables.forEach(tb=>{ tb.guests=tb.guests.filter(id=>id!==gid); });
+  t.guests.push(gid);
+  refreshChip(t); updateStats();
+  const g=ALL_GUESTS.find(x=>x.id===gid);
+  showToast('✓ '+g.name+' → '+t.name);
+  openPopup(activeTableId,document.getElementById('chip-'+activeTableId));
+}
+
+/* ══ STATS ══ */
+function updateStats(){
+  const a=ALL_GUESTS.filter(g=>isAssigned(g.id)).length;
+  document.getElementById('stAssigned').textContent=a;
+  document.getElementById('stPending').textContent=ALL_GUESTS.length-a;
+  document.getElementById('stTotal').textContent=ALL_GUESTS.length;
+  document.getElementById('saveInfo').textContent=a+' de '+ALL_GUESTS.length+' asignados ✦';
+}
+
+/* ══ SAVE ══ */
+function saveLayout(){
+  try{ localStorage.setItem('weddingTables',JSON.stringify(tables.map(t=>({id:t.id,name:t.name,x:t.x,y:t.y,guests:t.guests})))); }catch(e){}
+  showToast('✓ Distribución guardada');
+}
+
+/* ══ NAV ══ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  closePopup();
+}
+
+/* ══ TOAST ══ */
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2300);
+}
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('screenPlanner').classList.contains('active')) layoutTables();
+});
+</script>
+</body>
+</html>
