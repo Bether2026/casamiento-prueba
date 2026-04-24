@@ -66,9 +66,6 @@
   .dash-date { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.45); margin-top: 0.2rem; }
   .logout-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.35); background: none; border: 1px solid rgba(201,168,76,0.14); border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; }
   .logout-btn:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
-  .header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
-  .mesas-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: var(--deep); background: var(--gold); border: none; border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
-  .mesas-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 
   /* STATS STRIP */
   .stats-strip { max-width: 1200px; margin: 2.5rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
@@ -162,10 +159,7 @@
         <h1 class="dash-heading">Lista de Invitados</h1>
         <p class="dash-date">14 · 06 · 2025</p>
       </div>
-      <div class="header-actions">
-        <a class="mesas-btn" href="mesas.html">🪑 &nbsp;VER MESAS</a>
-        <button class="logout-btn" onclick="logout()">SALIR</button>
-      </div>
+      <button class="logout-btn" onclick="logout()">SALIR</button>
     </div>
   </header>
 
@@ -286,10 +280,11 @@ function logout() {
   document.getElementById('pwInput').value = '';
 }
 
-// ═══ DATA — 100 invitados inventados ═══
-const guests = [
-  { id:1,  name:'Ana Sofía Ramírez',      table:1,  rsvp:'yes',     trivia:9  },
-  { id:2,  name:'Carlos Eduardo Villanueva', table:1, rsvp:'yes',   trivia:7  },
+// ═══ DATA — viene del Google Sheet dinámicamente ═══
+// (ya no hay array hardcodeado — todo se carga desde el Sheet "Invitados")
+const _unused = [
+  { id:1,  name:'placeholder', table:1, rsvp:'pending', trivia:null },
+  { id:2,  name:'placeholder', table:1, rsvp:'pending', trivia:null },
   { id:3,  name:'María José Herrera',     table:1,  rsvp:'yes',     trivia:10 },
   { id:4,  name:'Luis Antonio Mendoza',   table:1,  rsvp:'no',      trivia:null },
   { id:5,  name:'Patricia Gómez de Ruiz', table:2,  rsvp:'yes',     trivia:6  },
@@ -387,31 +382,77 @@ const guests = [
   { id:97, name:'Maximiliano Renato Sosa', table:8, rsvp:'pending', trivia:null },
   { id:98, name:'Graciela Noemí Briones', table:9,  rsvp:'yes',     trivia:10 },
   { id:99, name:'Ernestina Rocío Zavala', table:10, rsvp:'yes',     trivia:6  },
-  { id:100,name:'Valentín Rodrigo Cerna', table:11, rsvp:'yes',     trivia:8  },
-];
+  { id:100,name:'placeholder', table:1, rsvp:'pending', trivia:null },
+]; // array no usado - datos vienen del Sheet
 
+
+// ── URL del Apps Script ──
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh9bZxBXH6qZGRH_VYmUhJ5xS-NmA8JZmFb7RkjtjI_3uWPvs6HzdZX97qrNnCCdGuow/exec';
+
+let allGuests     = [];   // datos mergeados del Sheet
 let currentFilter = 'all';
 let currentSearch = '';
 
+// ── Cargar y renderizar todo ──
 function initDashboard() {
-  updateStats();
-  renderTable();
-  setTimeout(() => {
-    const yes = guests.filter(g => g.rsvp === 'yes').length;
-    const pct = Math.round(yes / guests.length * 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressPct').textContent = pct + '%';
-  }, 300);
+  showLoading(true);
+  fetch(SHEET_URL + '?action=all')
+    .then(r => r.json())
+    .then(data => {
+      allGuests = Array.isArray(data) ? data : [];
+      showLoading(false);
+      updateStats();
+      renderTable();
+      animateProgress();
+      // Auto-refresh cada 60s
+      setInterval(refreshData, 60000);
+    })
+    .catch(() => {
+      showLoading(false);
+      showError();
+    });
+}
+
+function refreshData() {
+  fetch(SHEET_URL + '?action=all')
+    .then(r => r.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        allGuests = data;
+        updateStats();
+        renderTable();
+        animateProgress();
+      }
+    }).catch(()=>{});
+}
+
+function showLoading(on) {
+  const tbody = document.getElementById('guestTableBody');
+  if (on) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;font-style:italic;color:rgba(240,230,211,0.25);font-family:'Cormorant Garamond',serif">⏳ Cargando invitados...</td></tr>`;
+}
+
+function showError() {
+  const tbody = document.getElementById('guestTableBody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;font-style:italic;color:rgba(196,128,128,0.5);font-family:'Cormorant Garamond',serif">No se pudo conectar con el Sheet.<br>Verificá que el Apps Script esté publicado correctamente.</td></tr>`;
 }
 
 function updateStats() {
-  const yes = guests.filter(g => g.rsvp === 'yes').length;
-  const no  = guests.filter(g => g.rsvp === 'no').length;
-  const pending = guests.filter(g => g.rsvp === 'pending').length;
-  document.getElementById('statTotal').textContent = guests.length;
-  document.getElementById('statYes').textContent = yes;
-  document.getElementById('statNo').textContent = no;
+  const yes     = allGuests.filter(g => g.asistencia === 'Confirma').length;
+  const no      = allGuests.filter(g => g.asistencia === 'No asiste').length;
+  const pending = allGuests.filter(g => !g.asistencia || g.asistencia === 'Pendiente').length;
+  document.getElementById('statTotal').textContent   = allGuests.length;
+  document.getElementById('statYes').textContent     = yes;
+  document.getElementById('statNo').textContent      = no;
   document.getElementById('statPending').textContent = pending;
+}
+
+function animateProgress() {
+  const yes = allGuests.filter(g => g.asistencia === 'Confirma').length;
+  const pct = allGuests.length ? Math.round(yes / allGuests.length * 100) : 0;
+  setTimeout(() => {
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent  = pct + '%';
+  }, 300);
 }
 
 function setFilter(f, btn) {
@@ -427,44 +468,53 @@ function filterSearch(val) {
 }
 
 function renderTable() {
-  let data = [...guests];
+  let data = [...allGuests];
 
-  if (currentFilter === 'yes')     data = data.filter(g => g.rsvp === 'yes');
-  if (currentFilter === 'no')      data = data.filter(g => g.rsvp === 'no');
-  if (currentFilter === 'pending') data = data.filter(g => g.rsvp === 'pending');
-  if (currentFilter === 'trivia')  data = data.filter(g => g.trivia !== null);
+  if (currentFilter === 'yes')     data = data.filter(g => g.asistencia === 'Confirma');
+  if (currentFilter === 'no')      data = data.filter(g => g.asistencia === 'No asiste');
+  if (currentFilter === 'pending') data = data.filter(g => !g.asistencia || g.asistencia === 'Pendiente');
+  if (currentFilter === 'trivia')  data = data.filter(g => g.trivia !== null && g.trivia !== '');
 
-  if (currentSearch) {
-    data = data.filter(g => g.name.toLowerCase().includes(currentSearch));
-  }
+  if (currentSearch) data = data.filter(g => g.nombre.toLowerCase().includes(currentSearch));
 
   const tbody = document.getElementById('guestTableBody');
 
-  if (data.length === 0) {
+  if (!data.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;font-style:italic;color:rgba(240,230,211,0.25);font-family:'Cormorant Garamond',serif">Sin resultados</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = data.map(g => {
-    const badge = g.rsvp === 'yes'
+  tbody.innerHTML = data.map((g, i) => {
+    const rsvp = g.asistencia || 'Pendiente';
+    const badge = rsvp === 'Confirma'
       ? `<span class="badge badge-yes">✦ Confirma</span>`
-      : g.rsvp === 'no'
+      : rsvp === 'No asiste'
       ? `<span class="badge badge-no">✕ No asiste</span>`
       : `<span class="badge badge-pending">· Pendiente</span>`;
 
-    const scoreHtml = g.trivia !== null
+    const menuHtml = g.menu && g.menu !== 'Estándar' && g.menu !== '-'
+      ? `<span style="font-family:'Cinzel',serif;font-size:0.4rem;letter-spacing:0.2em;color:rgba(201,168,76,0.55);display:block;margin-top:2px">${g.menu}</span>`
+      : '';
+
+    const mesa = g.mesa ? `MESA ${g.mesa}` : '—';
+
+    const trivia = (g.trivia !== null && g.trivia !== '')
       ? `<div class="score-bar">
            <div class="score-mini"><div class="score-mini-fill" style="width:${g.trivia * 10}%"></div></div>
            <span class="score-val">${g.trivia}/10</span>
          </div>`
       : `<span class="no-score">—</span>`;
 
+    const fecha = g.fecha
+      ? `<span style="font-family:'Cinzel',serif;font-size:0.36rem;letter-spacing:0.15em;color:rgba(240,230,211,0.22);display:block;margin-top:2px">${g.fecha}</span>`
+      : '';
+
     return `<tr>
-      <td class="td-num">${g.id}</td>
-      <td class="td-name">${g.name}</td>
-      <td class="td-table">MESA ${g.table}</td>
-      <td>${badge}</td>
-      <td>${scoreHtml}</td>
+      <td class="td-num">${i + 1}</td>
+      <td class="td-name">${g.nombre}${fecha}</td>
+      <td class="td-table">${mesa}</td>
+      <td>${badge}${menuHtml}</td>
+      <td>${trivia}</td>
     </tr>`;
   }).join('');
 }
