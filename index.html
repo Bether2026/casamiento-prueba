@@ -646,12 +646,18 @@ window.openEnvelope = function() {
     playEnvOpen();
     wrap.classList.add('open');
 
-    // Tras la animación del sobre, lanzar transición elegante
     setTimeout(() => {
+      // El sobre empieza a desvanecerse INMEDIATAMENTE al arrancar la transición
+      const scr = document.getElementById('envScreen');
+      if (scr) {
+        scr.style.transition = 'opacity 0.9s ease';
+        scr.style.opacity    = '0';
+        scr.style.pointerEvents = 'none';
+        setTimeout(() => scr.classList.add('gone'), 950);
+      }
+
+      // La transición de partículas arranca al mismo tiempo
       elegantTransition(() => {
-        // Callback: mostrar invitación mientras el overlay cubre
-        const scr = document.getElementById('envScreen');
-        if (scr) { scr.classList.add('hide'); setTimeout(()=>scr.classList.add('gone'),900); }
         const inv = document.getElementById('invitation');
         if (inv) inv.classList.add('vis');
         startCountdown();
@@ -659,7 +665,8 @@ window.openEnvelope = function() {
         const mb = document.getElementById('musicBtn');
         if (mb) { mb.classList.add('vis'); mb.textContent='♫'; }
       });
-    }, 1100);
+
+    }, 1050);
   } catch(e) { console.warn('Envelope:', e); }
 };
 
@@ -674,28 +681,28 @@ function elegantTransition(onMidpoint) {
   const ctx = tc.getContext('2d');
   overlay.style.opacity = '1';
 
-  const TOTAL    = 2800;   // duración total ms
-  const MID      = 1100;   // momento del punto medio (swap)
+  const TOTAL    = 2600;   // duración total ms
+  const MID      = 900;    // swap más temprano — el velo cubre rápido
   let   start    = null;
   let   swapped  = false;
 
-  // Crear partículas: mezcla de puntos finos y líneas-trazo
+  // Partículas: mezcla de puntos finos y trazos-destello
   const particles = [];
-  for (let i = 0; i < 220; i++) {
+  for (let i = 0; i < 200; i++) {
     const big = Math.random() > 0.72;
     particles.push({
       x:      Math.random() * W,
-      y:      H + Math.random() * H * 0.35,        // empiezan abajo
-      vy:     -(0.28 + Math.random() * 0.55),       // velocidad ascendente
-      vx:     (Math.random() - 0.5) * 0.18,         // ligera deriva lateral
-      r:      big ? (1.2 + Math.random() * 2.2) : (0.3 + Math.random() * 0.9),
+      y:      H + Math.random() * H * 0.3,
+      vy:     -(0.25 + Math.random() * 0.5),
+      vx:     (Math.random() - 0.5) * 0.16,
+      r:      big ? (1.2 + Math.random() * 2.0) : (0.3 + Math.random() * 0.8),
       alpha:  0,
-      maxA:   big ? (0.55 + Math.random() * 0.3) : (0.25 + Math.random() * 0.35),
-      delay:  Math.random() * 600,                  // escalonadas
+      maxA:   big ? (0.5 + Math.random() * 0.28) : (0.22 + Math.random() * 0.3),
+      delay:  Math.random() * 500,
       spin:   (Math.random() - 0.5) * 0.04,
       angle:  Math.random() * Math.PI * 2,
-      streak: Math.random() > 0.78,                 // algunas son líneas
-      len:    6 + Math.random() * 18,
+      streak: Math.random() > 0.78,
+      len:    6 + Math.random() * 16,
     });
   }
 
@@ -704,46 +711,47 @@ function elegantTransition(onMidpoint) {
 
   function frame(ts) {
     if (!start) start = ts;
-    const elapsed = ts - start;
+    const elapsed  = ts - start;
     const progress = Math.min(elapsed / TOTAL, 1);
 
     ctx.clearRect(0, 0, W, H);
 
-    // Velo de fondo — sube hasta el midpoint y baja
+    // Velo de fondo — sube rápido hasta MID, luego baja suave
     let veilA;
-    if (progress < MID / TOTAL) {
-      veilA = easeInOut(progress / (MID / TOTAL)) * 0.82;
+    const midFrac = MID / TOTAL;
+    if (progress < midFrac) {
+      // Entra rápido — ya a los 900ms está en su pico
+      veilA = easeInOut(progress / midFrac) * 0.88;
     } else {
-      veilA = (1 - easeOut((progress - MID/TOTAL) / (1 - MID/TOTAL))) * 0.82;
+      // Sale lento y suave
+      veilA = (1 - easeOut((progress - midFrac) / (1 - midFrac))) * 0.88;
     }
-    // Gradiente radial centrado — oscuro elegante, no blanco
-    const grad = ctx.createRadialGradient(W*0.5, H*0.52, 0, W*0.5, H*0.5, W*0.72);
-    grad.addColorStop(0,   `rgba(12,8,3,${veilA * 0.55})`);
-    grad.addColorStop(0.5, `rgba(8,5,1,${veilA * 0.88})`);
-    grad.addColorStop(1,   `rgba(4,3,0,${veilA})`);
+
+    const grad = ctx.createRadialGradient(W*0.5, H*0.52, 0, W*0.5, H*0.5, W*0.75);
+    grad.addColorStop(0,   `rgba(14,9,3,${veilA * 0.5})`);
+    grad.addColorStop(0.45,`rgba(8,5,1,${veilA * 0.85})`);
+    grad.addColorStop(1,   `rgba(3,2,0,${veilA})`);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
-    // Swap en el midpoint
+    // Swap en MID
     if (!swapped && elapsed >= MID) {
       swapped = true;
       onMidpoint();
     }
 
-    // Partículas de polvo dorado
+    // Partículas doradas
     particles.forEach(p => {
-      const t = elapsed - p.delay;
+      const t  = elapsed - p.delay;
       if (t < 0) return;
       const pt = Math.min(t / TOTAL, 1);
 
-      // Alpha: sube suave, baja al final
-      if (pt < 0.35)      p.alpha = Math.min(p.maxA, p.alpha + 0.012);
-      else if (pt > 0.7)  p.alpha = Math.max(0, p.alpha - 0.008);
+      if (pt < 0.38)      p.alpha = Math.min(p.maxA, p.alpha + 0.011);
+      else if (pt > 0.68) p.alpha = Math.max(0, p.alpha - 0.007);
 
       p.x     += p.vx;
       p.y     += p.vy;
       p.angle += p.spin;
-
       if (p.alpha <= 0) return;
 
       ctx.save();
@@ -752,7 +760,6 @@ function elegantTransition(onMidpoint) {
       ctx.rotate(p.angle);
 
       if (p.streak) {
-        // Trazo fino — como un destello de luz
         const lg = ctx.createLinearGradient(0, -p.len/2, 0, p.len/2);
         lg.addColorStop(0,   'rgba(255,245,200,0)');
         lg.addColorStop(0.5, `rgba(232,201,120,${p.alpha})`);
@@ -764,14 +771,13 @@ function elegantTransition(onMidpoint) {
         ctx.lineTo(0,  p.len/2);
         ctx.stroke();
       } else {
-        // Punto brillante con halo
-        const rg = ctx.createRadialGradient(0,0,0, 0,0, p.r*2.8);
+        const rg = ctx.createRadialGradient(0,0,0, 0,0, p.r*2.6);
         rg.addColorStop(0,   `rgba(255,250,220,${p.alpha})`);
-        rg.addColorStop(0.4, `rgba(232,201,120,${p.alpha*0.7})`);
+        rg.addColorStop(0.4, `rgba(232,201,120,${p.alpha*0.65})`);
         rg.addColorStop(1,   'rgba(201,168,76,0)');
         ctx.fillStyle = rg;
         ctx.beginPath();
-        ctx.arc(0, 0, p.r * 2.8, 0, Math.PI*2);
+        ctx.arc(0, 0, p.r*2.6, 0, Math.PI*2);
         ctx.fill();
       }
       ctx.restore();
@@ -780,10 +786,9 @@ function elegantTransition(onMidpoint) {
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
-      // Limpiar overlay
-      overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 0.5s ease';
-      setTimeout(() => { overlay.style.display = 'none'; }, 550);
+      overlay.style.transition = 'opacity 0.45s ease';
+      overlay.style.opacity    = '0';
+      setTimeout(() => { overlay.style.display = 'none'; }, 500);
     }
   }
 
