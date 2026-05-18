@@ -2,185 +2,529 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de Control — Sofía & Andrés</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0805">
+<title>Panel · Sofía & Andrés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --champagne: #f0e6d3;
-    --gold: #c9a84c;
-    --gold-light: #e8c97a;
-    --ivory: #faf7f2;
-    --deep: #0d0905;
-    --ink: #2d2418;
-    --green: #5a9e7a;
-    --red: #b05a5a;
-    --amber: #c9913a;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--deep); font-family: 'Montserrat', sans-serif; overflow-x: hidden; min-height: 100vh; }
+:root{
+  --champagne:  #f0e6d3;
+  --gold:       #c9a84c;
+  --gold-2:     #e8c97a;
+  --gold-deep:  #826636;
+  --gold-line:  rgba(201,168,76,.22);
+  --gold-line-2:rgba(201,168,76,.4);
+  --ivory:      #faf7f2;
+  --noir:       #0a0805;
+  --noir-2:     #14100a;
+  --ink:        #2d2418;
+  --green:      #7ec49a;
+  --red:        #c48080;
+  --amber:      #c9913a;
 
-  /* ── LOGIN SCREEN ── */
-  #loginScreen {
-    position: fixed; inset: 0; z-index: 999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: var(--deep);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  #loginScreen.hide { opacity: 0; transform: scale(1.04); pointer-events: none; }
-  .login-mono { font-family: 'Cormorant Garamond', serif; font-size: 4rem; color: var(--gold); opacity: 0.4; font-style: italic; margin-bottom: 0.3rem; }
-  .login-title { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em; color: var(--gold); margin-bottom: 0.5rem; opacity: 0.7; }
-  .login-subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; color: var(--champagne); opacity: 0.45; margin-bottom: 2.5rem; letter-spacing: 0.05em; }
-  .login-box { background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.18); border-radius: 3px; padding: 2.2rem 2.5rem; width: min(360px, 88vw); text-align: center; }
-  .login-label { font-family: 'Cinzel', serif; font-size: 0.52rem; letter-spacing: 0.44em; color: var(--gold); opacity: 0.65; margin-bottom: 1rem; display: block; }
-  .login-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,0.22); border-radius: 2px; padding: 0.75rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--champagne); text-align: center; letter-spacing: 0.3em; outline: none; transition: border-color 0.3s; }
-  .login-input:focus { border-color: rgba(201,168,76,0.55); }
-  .login-input::placeholder { color: rgba(240,230,211,0.2); letter-spacing: 0.2em; }
-  .login-btn { margin-top: 1.2rem; width: 100%; padding: 0.75rem; background: var(--gold); color: var(--deep); border: none; border-radius: 2px; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.3em; cursor: pointer; transition: background 0.3s, transform 0.2s; }
-  .login-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
-  .login-err { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.88rem; color: #c06060; margin-top: 0.8rem; opacity: 0; transition: opacity 0.3s; }
-  .login-err.vis { opacity: 1; }
+  --serif:'Cormorant Garamond',serif;
+  --caps:'Cinzel',serif;
+  --sans:'Montserrat',sans-serif;
 
-  /* ── CANVAS BG ── */
-  #bgCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ background: var(--noir); }
+body{
+  font-family: var(--sans); color: var(--champagne);
+  overflow-x:hidden; min-height:100svh;
+  -webkit-font-smoothing:antialiased;
+}
+button{ font-family:inherit; cursor:pointer; }
+input{ font-family:inherit; }
 
-  /* ── DASHBOARD ── */
-  #dashboard { display: none; position: relative; z-index: 1; padding: 0 0 4rem; }
-  #dashboard.vis { display: block; animation: fadeUp 0.8s ease forwards; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+/* ── BACKGROUND ── */
+.bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background: radial-gradient(ellipse 90% 60% at 50% 0%, #1a120a 0%, #0a0805 55%, #060403 100%);
+}
+.bg-silk{
+  position:absolute; inset:-20%; filter: blur(60px); opacity:.8;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(201,168,76,.18), transparent 38%),
+    radial-gradient(circle at 78% 26%, rgba(141, 90, 50,.15), transparent 42%),
+    radial-gradient(circle at 30% 70%, rgba(80, 40, 30,.18), transparent 45%),
+    radial-gradient(circle at 84% 78%, rgba(201,168,76,.1), transparent 40%);
+  animation: silkDrift 36s ease-in-out infinite alternate;
+}
+@keyframes silkDrift{
+  0%   { transform: translate3d(-3%,-2%,0) rotate(0deg)  scale(1.05); }
+  100% { transform: translate3d(2%, 1%,0) rotate(6deg)   scale(1.12); }
+}
+.bg-grain{
+  position:absolute; inset:0; opacity:.14; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .8  0 0 0 0 .68  0 0 0 0 .4  0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.bg-vignette{ position:absolute; inset:0; background: radial-gradient(ellipse 75% 60% at 50% 50%, transparent 50%, rgba(0,0,0,.55) 100%); }
 
-  /* HEADER */
-  .dash-header {
-    background: linear-gradient(180deg, rgba(13,9,5,1) 0%, rgba(13,9,5,0.92) 100%);
-    border-bottom: 1px solid rgba(201,168,76,0.14);
-    padding: 2rem clamp(1.5rem,5vw,3rem) 1.8rem;
-    text-align: center;
-    position: sticky; top: 0; z-index: 100;
-    backdrop-filter: blur(12px);
-  }
-  .dash-header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-  .dash-logo { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.9rem; color: var(--gold); opacity: 0.7; }
-  .dash-title-wrap { text-align: center; flex: 1; }
-  .dash-eyebrow { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.5em; color: var(--gold); opacity: 0.6; }
-  .dash-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem,3vw,2rem); color: var(--champagne); font-weight: 300; }
-  .dash-date { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.45); margin-top: 0.2rem; }
-  .logout-btn { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.35); background: none; border: 1px solid rgba(201,168,76,0.14); border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.3s; }
-  .logout-btn:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
+/* ══════════════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════════════ */
+#loginScreen{
+  position: fixed; inset:0; z-index:999;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding: clamp(1.5rem,5vw,3rem);
+  transition: opacity .8s var(--ease), transform .8s var(--ease);
+}
+#loginScreen.hide{ opacity:0; transform: scale(1.05); pointer-events:none; }
 
-  /* STATS STRIP */
-  .stats-strip { max-width: 1200px; margin: 2.5rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-  @media(max-width:700px){ .stats-strip { grid-template-columns: repeat(2,1fr); } }
-  .stat-card { background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.14); border-radius: 3px; padding: 1.4rem 1.2rem; text-align: center; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s; }
-  .stat-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-2px); }
-  .stat-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg,transparent,rgba(201,168,76,0.04),transparent); animation: shimmer 5s ease-in-out infinite; }
-  @keyframes shimmer { 0%{left:-100%} 100%{left:220%} }
-  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.2rem); font-weight: 300; color: var(--champagne); line-height: 1; display: block; }
-  .stat-num.green { color: #7ec49a; }
-  .stat-num.red { color: #c48080; }
-  .stat-num.amber { color: var(--gold); }
-  .stat-lbl { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.5); margin-top: 0.4rem; display: block; }
-  .stat-icon { font-size: 1.1rem; display: block; margin-bottom: 0.5rem; opacity: 0.6; }
+.login-mono{
+  font-family: var(--caps); font-weight:500;
+  font-size: clamp(2.6rem, 9vw, 3.6rem);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201,168,76,.55);
+  letter-spacing: .12em;
+  line-height: 1; margin-bottom: .6rem;
+}
+.login-mono .amp{
+  font-family: var(--serif); font-style:italic;
+  font-size: .55em; color: var(--gold);
+  -webkit-text-stroke: 0;
+  vertical-align:.12em;
+  margin: 0 .1em;
+}
+.login-eyebrow{
+  font-family: var(--caps); font-size: .6rem;
+  letter-spacing: .55em; color: var(--gold);
+  opacity: .85; margin-bottom: .8rem;
+}
+.login-rule{
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 1.3rem;
+}
+.login-sub{
+  font-family: var(--serif); font-style:italic;
+  font-size: 1rem; color: rgba(240,230,211,.45);
+  margin-bottom: 2.5rem; letter-spacing:.04em;
+  text-align:center;
+}
+.login-card{
+  width: min(380px, 88vw);
+  padding: 2rem 2rem 1.8rem;
+  background: linear-gradient(180deg, rgba(201,168,76,.05), rgba(201,168,76,0) 70%);
+  border: 1px solid var(--gold-line);
+  border-radius: 3px;
+  text-align: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+.login-card::after{
+  content:''; position:absolute; top:0; left:-100%; width:50%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.06), transparent);
+  animation: shimmer 6s ease-in-out infinite;
+}
+@keyframes shimmer{ 0%{left:-100%} 100%{left:220%} }
+.login-label{
+  font-family: var(--caps); font-size: .52rem;
+  letter-spacing: .45em; color: var(--gold);
+  opacity:.7; display:block; margin-bottom:1rem;
+}
+.login-input{
+  width:100%;
+  background: rgba(255,255,255,.03);
+  border:1px solid var(--gold-line);
+  border-radius: 2px;
+  padding: .85rem 1rem;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: var(--champagne); text-align:center;
+  letter-spacing: .3em; outline: none;
+  transition: border-color .3s;
+}
+.login-input:focus{ border-color: var(--gold-line-2); }
+.login-input::placeholder{ color: rgba(240,230,211,.2); letter-spacing:.2em; }
+.login-btn{
+  margin-top: 1.2rem; width:100%;
+  padding: .85rem;
+  background: var(--gold); color: var(--noir);
+  border: 1px solid var(--gold); border-radius: 2px;
+  font-family: var(--caps);
+  font-size: .62rem; letter-spacing: .32em;
+  transition: all .3s var(--ease);
+}
+.login-btn:hover{
+  background: var(--gold-2); border-color: var(--gold-2);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(201,168,76,.26);
+}
+.login-err{
+  font-family: var(--serif); font-style:italic;
+  font-size: .9rem; color: #d68f8f;
+  margin-top: .8rem; opacity:0; height: 1.2rem;
+  transition: opacity .3s;
+}
+.login-err.vis{ opacity:1; }
+.login-hint{
+  margin-top: 2rem;
+  font-family: var(--serif); font-style:italic;
+  font-size: .82rem; color: rgba(201,168,76,.32);
+  letter-spacing:.1em;
+}
 
-  /* PROGRESS BAR */
-  .progress-wrap { max-width: 1200px; margin: 1.8rem auto 0; padding: 0 clamp(1.5rem,5vw,3rem); }
-  .progress-label { display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.35em; color: rgba(201,168,76,0.5); margin-bottom: 0.6rem; }
-  .progress-bar { height: 3px; background: rgba(201,168,76,0.1); border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #7ec49a, var(--gold)); border-radius: 2px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+/* ══════════════════════════════════════════════
+   DASHBOARD
+   ══════════════════════════════════════════════ */
+#dashboard{
+  display:none; position:relative; z-index:1;
+  padding-bottom: 4rem;
+}
+#dashboard.vis{ display:block; animation: fadeUp .8s var(--ease); }
+@keyframes fadeUp{ from{opacity:0; transform: translateY(20px)} to{opacity:1; transform: translateY(0)} }
 
-  /* CONTROLS */
-  .table-controls { max-width: 1200px; margin: 2.5rem auto 1.2rem; padding: 0 clamp(1.5rem,5vw,3rem); display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; justify-content: space-between; }
-  .filter-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .filter-tab { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.3em; padding: 0.45rem 1rem; border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; background: transparent; color: rgba(240,230,211,0.45); cursor: pointer; transition: all 0.25s; }
-  .filter-tab:hover { border-color: rgba(201,168,76,0.45); color: var(--champagne); }
-  .filter-tab.active { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); }
-  .search-wrap { position: relative; }
-  .search-input { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,76,0.18); border-radius: 2px; padding: 0.45rem 1rem 0.45rem 2.2rem; font-family: 'Montserrat', sans-serif; font-size: 0.72rem; color: var(--champagne); outline: none; width: 200px; transition: border-color 0.3s; }
-  .search-input:focus { border-color: rgba(201,168,76,0.45); }
-  .search-input::placeholder { color: rgba(240,230,211,0.2); }
-  .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: rgba(201,168,76,0.35); pointer-events: none; }
+/* HEADER */
+.dash-header{
+  background: rgba(10,8,5,.85);
+  border-bottom: 1px solid var(--gold-line);
+  padding: 1.4rem clamp(1.4rem,5vw,2.5rem) 1.4rem;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(14px);
+}
+.dash-header-inner{
+  max-width: 1200px; margin: 0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap: 1rem;
+}
+.dash-logo{
+  font-family: var(--caps); font-weight:500;
+  font-size: 1.4rem; letter-spacing:.1em;
+  color: var(--gold); opacity:.85;
+}
+.dash-logo .amp{
+  font-family: var(--serif); font-style:italic;
+  font-size: .8em; vertical-align: .08em;
+  margin: 0 .1em;
+}
+.dash-title-wrap{ text-align:center; flex:1; min-width:0; }
+.dash-eyebrow{
+  font-family: var(--caps); font-size: .5rem;
+  letter-spacing: .5em; color: var(--gold); opacity:.65;
+}
+.dash-heading{
+  font-family: var(--serif); font-weight:300;
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  line-height:1.2; color: var(--champagne);
+}
+.dash-date{
+  font-family: var(--caps); font-size: .48rem;
+  letter-spacing: .42em; color: rgba(201,168,76,.45);
+  margin-top: .35rem;
+}
+.header-actions{ display:flex; gap:.5rem; }
+.header-btn{
+  font-family: var(--caps); font-size: .48rem;
+  letter-spacing: .35em;
+  color: rgba(201,168,76,.45);
+  background: transparent;
+  border: 1px solid var(--gold-line);
+  border-radius: 2px;
+  padding: .5rem .9rem;
+  transition: all .3s var(--ease);
+  white-space:nowrap;
+  text-decoration:none;
+  display:inline-flex; align-items:center;
+}
+.header-btn:hover{ color: var(--gold); border-color: var(--gold-line-2); background: rgba(201,168,76,.04); }
+.header-btn.primary{ color: var(--gold); border-color: var(--gold-line-2); }
 
-  /* TABLE */
-  .table-wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(1.5rem,5vw,3rem); overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { border-bottom: 1px solid rgba(201,168,76,0.16); }
-  th { font-family: 'Cinzel', serif; font-size: 0.48rem; letter-spacing: 0.4em; color: rgba(201,168,76,0.5); padding: 0.8rem 1rem; text-align: left; font-weight: 400; white-space: nowrap; }
-  th:last-child { text-align: center; }
-  tbody tr { border-bottom: 1px solid rgba(201,168,76,0.06); transition: background 0.2s; }
-  tbody tr:hover { background: rgba(201,168,76,0.03); }
-  td { padding: 0.85rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--champagne); vertical-align: middle; }
-  td.td-num { font-family: 'Cinzel', serif; font-size: 0.55rem; color: rgba(201,168,76,0.4); }
-  td.td-name { font-size: 1.05rem; }
-  td.td-table { font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.2em; color: rgba(240,230,211,0.45); }
-  .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.22rem 0.7rem; border-radius: 20px; font-family: 'Cinzel', serif; font-size: 0.45rem; letter-spacing: 0.3em; white-space: nowrap; }
-  .badge-yes { background: rgba(126,196,154,0.12); color: #7ec49a; border: 1px solid rgba(126,196,154,0.25); }
-  .badge-no { background: rgba(196,128,128,0.12); color: #c48080; border: 1px solid rgba(196,128,128,0.25); }
-  .badge-pending { background: rgba(201,168,76,0.08); color: rgba(201,168,76,0.6); border: 1px solid rgba(201,168,76,0.18); }
-  .score-bar { display: flex; align-items: center; gap: 0.6rem; }
-  .score-mini { height: 3px; border-radius: 2px; background: rgba(201,168,76,0.1); flex: 1; min-width: 60px; overflow: hidden; }
-  .score-mini-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
-  .score-val { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: var(--gold); min-width: 36px; text-align: right; }
-  .no-score { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.82rem; color: rgba(240,230,211,0.2); }
+/* STATS */
+.stats-strip{
+  max-width: 1200px; margin: 2.6rem auto 0;
+  padding: 0 clamp(1.4rem,5vw,2.5rem);
+  display:grid; grid-template-columns: repeat(4, 1fr);
+  gap: .9rem;
+}
+@media(max-width:700px){ .stats-strip{ grid-template-columns: repeat(2,1fr); } }
 
-  /* GOLD RULE */
-  .gold-rule { width: 55px; height: 1px; margin: 0.8rem auto 0; background: linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent); }
+.stat-card{
+  background: linear-gradient(180deg, rgba(201,168,76,.04), rgba(201,168,76,0) 70%);
+  border: 1px solid var(--gold-line);
+  border-radius: 3px;
+  padding: 1.5rem 1.2rem 1.3rem;
+  text-align: center; position:relative; overflow:hidden;
+  transition: border-color .3s var(--ease), transform .3s var(--ease), background .3s var(--ease);
+}
+.stat-card:hover{
+  border-color: var(--gold-line-2);
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, rgba(201,168,76,.08), rgba(201,168,76,0) 70%);
+}
+.stat-card::before{
+  content:''; position:absolute; top:0; left:50%; transform: translateX(-50%);
+  width:24px; height:1px; background: var(--gold);
+}
+.stat-icon{
+  width:24px; height:24px; margin: 0 auto .8rem;
+  color: var(--gold); opacity:.7;
+}
+.stat-icon svg{ width:100%; height:100%; stroke:currentColor; stroke-width:1; fill:none; }
+.stat-num{
+  display:block;
+  font-family: var(--serif); font-weight:300;
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  color: var(--champagne); line-height:1;
+  font-variant-numeric: tabular-nums;
+}
+.stat-num.green{ color: var(--green); }
+.stat-num.red{   color: var(--red); }
+.stat-num.amber{ color: var(--gold); }
+.stat-lbl{
+  display:block; margin-top: .5rem;
+  font-family: var(--caps); font-size: .48rem;
+  letter-spacing: .42em; color: var(--gold-deep);
+}
 
-  /* RESPONSIVE */
-  @media(max-width:600px){
-    th:nth-child(3), td:nth-child(3) { display: none; }
-    .search-input { width: 140px; }
-  }
+/* PROGRESS */
+.progress-wrap{
+  max-width: 1200px; margin: 2rem auto 0;
+  padding: 0 clamp(1.4rem,5vw,2.5rem);
+}
+.progress-label{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family: var(--caps); font-size: .5rem;
+  letter-spacing: .42em; color: rgba(201,168,76,.55);
+  margin-bottom: .7rem;
+}
+.progress-bar{
+  height: 3px; background: rgba(201,168,76,.1);
+  border-radius: 2px; overflow:hidden;
+  position:relative;
+}
+.progress-fill{
+  height:100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 2px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.progress-fill::after{
+  content:''; position:absolute; right:0; top:50%; transform: translate(50%,-50%);
+  width:8px; height:8px; border-radius:50%;
+  background: var(--gold-2);
+  box-shadow: 0 0 12px var(--gold);
+}
+
+/* CONTROLS */
+.controls{
+  max-width: 1200px; margin: 2.6rem auto 1.2rem;
+  padding: 0 clamp(1.4rem,5vw,2.5rem);
+  display:flex; flex-wrap:wrap; gap:.8rem;
+  align-items:center; justify-content:space-between;
+}
+.filter-tabs{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.filter-tab{
+  font-family: var(--caps); font-size: .5rem;
+  letter-spacing: .32em;
+  padding: .5rem 1rem;
+  border: 1px solid var(--gold-line);
+  border-radius: 2px;
+  background: transparent;
+  color: rgba(240,230,211,.5);
+  transition: all .25s var(--ease);
+}
+.filter-tab:hover{ border-color: var(--gold-line-2); color: var(--champagne); }
+.filter-tab.active{ background: rgba(201,168,76,.1); border-color: var(--gold); color: var(--gold); }
+
+.search-wrap{ position:relative; }
+.search-input{
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--gold-line);
+  border-radius: 2px;
+  padding: .5rem 1rem .5rem 2.4rem;
+  font-family: var(--sans);
+  font-size: .76rem;
+  color: var(--champagne);
+  outline: none;
+  width: 220px;
+  transition: border-color .3s var(--ease);
+}
+.search-input:focus{ border-color: var(--gold-line-2); }
+.search-input::placeholder{ color: rgba(240,230,211,.22); }
+.search-icon{
+  position:absolute; left: .8rem; top:50%; transform: translateY(-50%);
+  color: rgba(201,168,76,.5);
+  width: 12px; height: 12px;
+  pointer-events:none;
+}
+.search-icon svg{ width:100%; height:100%; stroke: currentColor; stroke-width:2; fill:none; }
+
+/* TABLE */
+.table-wrap{
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 clamp(1.4rem,5vw,2.5rem);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table{ width:100%; border-collapse: collapse; }
+thead tr{ border-bottom: 1px solid var(--gold-line); }
+th{
+  font-family: var(--caps); font-size: .48rem;
+  letter-spacing: .42em; color: var(--gold);
+  opacity: .65;
+  padding: .9rem 1rem; text-align:left; font-weight:400;
+  white-space: nowrap;
+}
+th:last-child{ text-align: center; }
+tbody tr{
+  border-bottom: 1px solid rgba(201,168,76,.06);
+  transition: background .2s;
+}
+tbody tr:hover{ background: rgba(201,168,76,.03); }
+td{
+  padding: .95rem 1rem;
+  font-family: var(--serif); font-size: 1rem;
+  color: var(--champagne);
+  vertical-align: middle;
+}
+td.td-num{
+  font-family: var(--caps); font-size: .55rem;
+  letter-spacing: .12em;
+  color: rgba(201,168,76,.42);
+  font-variant-numeric: tabular-nums;
+}
+td.td-name{ font-size: 1.05rem; }
+td.td-table{
+  font-family: var(--caps); font-size: .55rem;
+  letter-spacing: .25em;
+  color: rgba(240,230,211,.5);
+}
+td.td-meta{
+  display:block;
+  font-family: var(--caps); font-size: .4rem;
+  letter-spacing: .25em;
+  color: rgba(201,168,76,.55);
+  margin-top: 3px;
+}
+td.td-fecha{
+  display:block;
+  font-family: var(--caps); font-size: .38rem;
+  letter-spacing: .2em;
+  color: rgba(240,230,211,.22);
+  margin-top: 3px;
+}
+
+.badge{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding: .3rem .8rem;
+  border-radius: 20px;
+  font-family: var(--caps); font-size: .45rem;
+  letter-spacing: .32em; white-space: nowrap;
+}
+.badge::before{
+  content:''; width:5px; height:5px; border-radius:50%;
+  background: currentColor; opacity:.85;
+}
+.badge-yes{ background: rgba(126,196,154,.12); color: var(--green); border:1px solid rgba(126,196,154,.25); }
+.badge-no{ background: rgba(196,128,128,.12); color: var(--red);   border:1px solid rgba(196,128,128,.25); }
+.badge-pending{ background: rgba(201,168,76,.08); color: rgba(201,168,76,.7); border:1px solid var(--gold-line); }
+
+.score-bar{ display:flex; align-items:center; gap:.6rem; min-width:120px; }
+.score-mini{ height:3px; border-radius:2px; background: rgba(201,168,76,.1); flex:1; min-width:60px; overflow:hidden; }
+.score-mini-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--gold), var(--gold-2)); }
+.score-val{
+  font-family: var(--serif); font-size: .92rem;
+  color: var(--gold); min-width: 38px; text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+.no-score{
+  font-family: var(--serif); font-style: italic;
+  font-size: .82rem; color: rgba(240,230,211,.22);
+}
+
+.empty-state{
+  text-align:center; padding: 3rem 1rem;
+  font-family: var(--serif); font-style:italic;
+  font-size: 1rem; color: rgba(240,230,211,.25);
+}
+.empty-state.error{ color: rgba(196,128,128,.6); }
+.empty-state svg{
+  width:36px; height:36px; margin: 0 auto 1rem;
+  display:block; opacity:.4;
+  stroke: currentColor; stroke-width:1; fill:none;
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  th:nth-child(3), td:nth-child(3){ display:none; }
+  .search-input{ width: 150px; }
+  td{ font-size:.95rem; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bg-silk, .stat-card::before, .login-card::after, .progress-fill::after{ animation:none; }
+}
 </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
+<!-- BG -->
+<div class="bg" aria-hidden="true">
+  <div class="bg-silk"></div>
+  <div class="bg-grain"></div>
+  <div class="bg-vignette"></div>
+</div>
 
-<!-- ── LOGIN ── -->
+<!-- ══════════════════ LOGIN ══════════════════ -->
 <div id="loginScreen">
-  <div class="login-mono">S &amp; A</div>
-  <p class="login-title">PANEL DE CONTROL</p>
-  <p class="login-subtitle">Solo para los novios</p>
-  <div class="login-box">
+  <p class="login-eyebrow">PANEL PRIVADO</p>
+  <div class="login-mono">S<span class="amp">&amp;</span>A</div>
+  <div class="login-rule"></div>
+  <p class="login-sub">Acceso solo para los novios</p>
+
+  <div class="login-card">
     <span class="login-label">CONTRASEÑA</span>
-    <input class="login-input" type="password" id="pwInput" placeholder="••••••" onkeydown="if(event.key==='Enter')checkLogin()">
+    <input class="login-input" type="password" id="pwInput" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkLogin()">
     <button class="login-btn" onclick="checkLogin()">INGRESAR</button>
     <p class="login-err" id="loginErr">Contraseña incorrecta</p>
   </div>
+
+  <p class="login-hint">14 · 06 · 2025</p>
 </div>
 
-<!-- ── DASHBOARD ── -->
+<!-- ══════════════════ DASHBOARD ══════════════════ -->
 <div id="dashboard">
 
   <header class="dash-header">
     <div class="dash-header-inner">
-      <span class="dash-logo">S &amp; A</span>
+      <span class="dash-logo">S<span class="amp">&amp;</span>A</span>
       <div class="dash-title-wrap">
         <p class="dash-eyebrow">PANEL PRIVADO</p>
         <h1 class="dash-heading">Lista de Invitados</h1>
         <p class="dash-date">14 · 06 · 2025</p>
       </div>
-      <button class="logout-btn" onclick="logout()">SALIR</button>
+      <div class="header-actions">
+        <a href="mesas.html" class="header-btn primary">MESAS &nbsp;→</a>
+        <button class="header-btn" onclick="logout()">SALIR</button>
+      </div>
     </div>
   </header>
 
   <div class="stats-strip">
     <div class="stat-card">
-      <span class="stat-icon">👥</span>
-      <span class="stat-num" id="statTotal">100</span>
+      <div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 21 c0-3.3 2.7-6 6-6 s6 2.7 6 6"/><circle cx="17" cy="9" r="3"/><path d="M14 16 c2-1.5 7-1 7 5"/></svg></div>
+      <span class="stat-num" id="statTotal">--</span>
       <span class="stat-lbl">INVITADOS</span>
     </div>
     <div class="stat-card">
-      <span class="stat-icon">🥂</span>
+      <div class="stat-icon" style="color:var(--green)"><svg viewBox="0 0 24 24"><path d="M9 11 v8 M15 11 v8 M9 11 a3 3 0 0 1 0-6 a3 3 0 0 1 0 6 M15 11 a3 3 0 0 1 0-6 a3 3 0 0 1 0 6 M6 19 h12"/></svg></div>
       <span class="stat-num green" id="statYes">0</span>
       <span class="stat-lbl">CONFIRMAN</span>
     </div>
     <div class="stat-card">
-      <span class="stat-icon">🌿</span>
+      <div class="stat-icon" style="color:var(--red)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9 l6 6 M15 9 l-6 6"/></svg></div>
       <span class="stat-num red" id="statNo">0</span>
       <span class="stat-lbl">NO ASISTEN</span>
     </div>
     <div class="stat-card">
-      <span class="stat-icon">⏳</span>
+      <div class="stat-icon" style="color:var(--gold)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7 v5 l3.5 2"/></svg></div>
       <span class="stat-num amber" id="statPending">0</span>
       <span class="stat-lbl">PENDIENTES</span>
     </div>
@@ -194,7 +538,7 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
 
-  <div class="table-controls">
+  <div class="controls">
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="setFilter('all',this)">TODOS</button>
       <button class="filter-tab" onclick="setFilter('yes',this)">CONFIRMAN</button>
@@ -203,8 +547,8 @@
       <button class="filter-tab" onclick="setFilter('trivia',this)">CON TRIVIA</button>
     </div>
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input class="search-input" type="text" placeholder="Buscar invitado..." oninput="filterSearch(this.value)" id="searchInput">
+      <span class="search-icon"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></span>
+      <input class="search-input" type="text" placeholder="Buscar invitado…" oninput="filterSearch(this.value)" id="searchInput">
     </div>
   </div>
 
@@ -226,34 +570,10 @@
 </div>
 
 <script>
-// ═══ CANVAS BG ═══
-try {
-  const c = document.getElementById('bgCanvas');
-  const x = c.getContext('2d');
-  let W, H, t = 0;
-  const resize = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
-  resize(); window.addEventListener('resize', resize);
-  const S = [];
-  for (let i = 0; i < 90; i++) S.push({ px:Math.random(), py:Math.random(), r:.28+Math.random()*.85, sp:.00005+Math.random()*.00012, ph:Math.random()*Math.PI*2, g:Math.random()>.72 });
-  function frame() {
-    t += .003; x.clearRect(0,0,W,H);
-    const bg = x.createRadialGradient(W*.5,H*.38,0,W*.5,H*.5,W*.9);
-    bg.addColorStop(0,'#1a1007'); bg.addColorStop(.55,'#0e0904'); bg.addColorStop(1,'rgba(4,3,1,0)');
-    x.fillStyle = bg; x.fillRect(0,0,W,H);
-    S.forEach(s => {
-      const px=((s.px+t*s.sp)%1)*W, py=s.py*H, tw=.38+.62*Math.sin(t*3.2+s.ph);
-      x.beginPath(); x.arc(px,py,s.r,0,Math.PI*2);
-      x.fillStyle=s.g?`rgba(232,201,120,${.45*tw})`:`rgba(255,250,242,${.35*tw})`; x.fill();
-    });
-    requestAnimationFrame(frame);
-  }
-  frame();
-} catch(e) {}
+/* ══ LOGIN ══ */
+const PASSWORD = 'sofia2025'; // ← cambiá por la contraseña real
 
-// ═══ LOGIN ═══
-const PASSWORD = 'sofia2025'; // Cambiar por la contraseña real
-
-function checkLogin() {
+function checkLogin(){
   const val = document.getElementById('pwInput').value;
   const err = document.getElementById('loginErr');
   if (val === PASSWORD) {
@@ -272,7 +592,7 @@ function checkLogin() {
   }
 }
 
-function logout() {
+function logout(){
   document.getElementById('dashboard').style.display = 'none';
   document.getElementById('dashboard').classList.remove('vis');
   document.getElementById('loginScreen').style.display = 'flex';
@@ -280,140 +600,30 @@ function logout() {
   document.getElementById('pwInput').value = '';
 }
 
-// ═══ DATA — viene del Google Sheet dinámicamente ═══
-// (ya no hay array hardcodeado — todo se carga desde el Sheet "Invitados")
-const _unused = [
-  { id:1,  name:'placeholder', table:1, rsvp:'pending', trivia:null },
-  { id:2,  name:'placeholder', table:1, rsvp:'pending', trivia:null },
-  { id:3,  name:'María José Herrera',     table:1,  rsvp:'yes',     trivia:10 },
-  { id:4,  name:'Luis Antonio Mendoza',   table:1,  rsvp:'no',      trivia:null },
-  { id:5,  name:'Patricia Gómez de Ruiz', table:2,  rsvp:'yes',     trivia:6  },
-  { id:6,  name:'Roberto Alejandro Cruz', table:2,  rsvp:'yes',     trivia:8  },
-  { id:7,  name:'Isabella Torres Vega',   table:2,  rsvp:'pending', trivia:null },
-  { id:8,  name:'Fernando Castillo Luna', table:2,  rsvp:'yes',     trivia:5  },
-  { id:9,  name:'Valentina Ríos Mora',    table:3,  rsvp:'yes',     trivia:9  },
-  { id:10, name:'Alejandro Fuentes Díaz', table:3,  rsvp:'no',      trivia:null },
-  { id:11, name:'Camila Vargas Serrano',  table:3,  rsvp:'yes',     trivia:7  },
-  { id:12, name:'Diego Moreno Alarcón',   table:3,  rsvp:'pending', trivia:null },
-  { id:13, name:'Natalia Jiménez Peña',   table:4,  rsvp:'yes',     trivia:10 },
-  { id:14, name:'Andrés Felipe Rojas',    table:4,  rsvp:'yes',     trivia:8  },
-  { id:15, name:'Laura Beatriz Salinas',  table:4,  rsvp:'yes',     trivia:6  },
-  { id:16, name:'Martín Sebastián Leal',  table:4,  rsvp:'no',      trivia:null },
-  { id:17, name:'Gabriela Escobar Ruiz',  table:5,  rsvp:'yes',     trivia:9  },
-  { id:18, name:'Javier Hernández Mora',  table:5,  rsvp:'yes',     trivia:4  },
-  { id:19, name:'Lucía Fernández Bautista', table:5, rsvp:'pending', trivia:null },
-  { id:20, name:'Pablo Ernesto Gutiérrez', table:5, rsvp:'yes',     trivia:7  },
-  { id:21, name:'Daniela Portillo Vázquez', table:6, rsvp:'yes',    trivia:8  },
-  { id:22, name:'Ricardo Omar Navarro',   table:6,  rsvp:'yes',     trivia:6  },
-  { id:23, name:'Sofía Cristina Paredes', table:6,  rsvp:'no',      trivia:null },
-  { id:24, name:'Emilio Antonio Reyes',   table:6,  rsvp:'pending', trivia:null },
-  { id:25, name:'Carolina Beatriz Mejía', table:7,  rsvp:'yes',     trivia:9  },
-  { id:26, name:'Iván Alejandro Soto',    table:7,  rsvp:'yes',     trivia:5  },
-  { id:27, name:'Paola Cristina Aguilar', table:7,  rsvp:'yes',     trivia:10 },
-  { id:28, name:'Sergio Manuel Delgado',  table:7,  rsvp:'yes',     trivia:7  },
-  { id:29, name:'Diana Laura Espinoza',   table:8,  rsvp:'pending', trivia:null },
-  { id:30, name:'Manuel Eduardo Ochoa',   table:8,  rsvp:'yes',     trivia:8  },
-  { id:31, name:'Rebeca Alejandra Vega',  table:8,  rsvp:'yes',     trivia:6  },
-  { id:32, name:'Gustavo Adolfo Ramos',   table:8,  rsvp:'no',      trivia:null },
-  { id:33, name:'Francisca Torres Nieto', table:9,  rsvp:'yes',     trivia:9  },
-  { id:34, name:'Héctor Ignacio Medina',  table:9,  rsvp:'yes',     trivia:7  },
-  { id:35, name:'Susana Beatriz Ortega',  table:9,  rsvp:'pending', trivia:null },
-  { id:36, name:'Jorge Luis Madrigal',    table:9,  rsvp:'yes',     trivia:8  },
-  { id:37, name:'Claudia Inés Palacios',  table:10, rsvp:'yes',     trivia:5  },
-  { id:38, name:'Arturo Rafael Cabrera',  table:10, rsvp:'no',      trivia:null },
-  { id:39, name:'Mariana Guadalupe Ibarra', table:10, rsvp:'yes',   trivia:10 },
-  { id:40, name:'René Armando Pacheco',   table:10, rsvp:'pending', trivia:null },
-  { id:41, name:'Verónica Lorena Solís',  table:11, rsvp:'yes',     trivia:7  },
-  { id:42, name:'Oswaldo Enrique Castro', table:11, rsvp:'yes',     trivia:6  },
-  { id:43, name:'Beatriz Elena Contreras', table:11, rsvp:'yes',    trivia:9  },
-  { id:44, name:'Hugo César León',        table:11, rsvp:'pending', trivia:null },
-  { id:45, name:'Adriana Marcela Téllez', table:12, rsvp:'yes',     trivia:8  },
-  { id:46, name:'Óscar Ernesto Domínguez', table:12, rsvp:'yes',    trivia:4  },
-  { id:47, name:'Liliana Esperanza Flores', table:12, rsvp:'no',    trivia:null },
-  { id:48, name:'Raúl Humberto Miranda',  table:12, rsvp:'yes',     trivia:7  },
-  { id:49, name:'Yolanda Patricia Trujillo', table:1, rsvp:'yes',   trivia:6  },
-  { id:50, name:'Enrique Alfredo Suárez', table:1,  rsvp:'pending', trivia:null },
-  { id:51, name:'Norma Cecilia Sandoval', table:2,  rsvp:'yes',     trivia:9  },
-  { id:52, name:'Armando Jesús Guerrero', table:2,  rsvp:'yes',     trivia:8  },
-  { id:53, name:'Alicia Guadalupe Vargas', table:3, rsvp:'no',      trivia:null },
-  { id:54, name:'Ernesto Claudio Montoya', table:3, rsvp:'yes',     trivia:5  },
-  { id:55, name:'Irma Beatriz Lozano',    table:3,  rsvp:'yes',     trivia:7  },
-  { id:56, name:'Jesús Antonio Pedraza',  table:4,  rsvp:'pending', trivia:null },
-  { id:57, name:'Rosa Elena Núñez',       table:4,  rsvp:'yes',     trivia:10 },
-  { id:58, name:'Pedro Mauricio Barajas', table:4,  rsvp:'yes',     trivia:6  },
-  { id:59, name:'Aurora Silvia Muñoz',    table:5,  rsvp:'pending', trivia:null },
-  { id:60, name:'Tomás Eduardo Rosales',  table:5,  rsvp:'yes',     trivia:8  },
-  { id:61, name:'Concepción Ávila Pérez', table:5,  rsvp:'no',      trivia:null },
-  { id:62, name:'Bernardo Patricio Rangel', table:6, rsvp:'yes',    trivia:7  },
-  { id:63, name:'Estela Carmela Ibáñez',  table:6,  rsvp:'yes',     trivia:9  },
-  { id:64, name:'Víctor Manuel Cárdenas', table:6,  rsvp:'pending', trivia:null },
-  { id:65, name:'Dolores Graciela Pinto', table:7,  rsvp:'yes',     trivia:5  },
-  { id:66, name:'Nicolás Aurelio Salazar', table:7, rsvp:'yes',     trivia:8  },
-  { id:67, name:'Esperanza Dolores Vidal', table:7, rsvp:'no',      trivia:null },
-  { id:68, name:'Mauricio Andrés Quiroga', table:8, rsvp:'yes',     trivia:6  },
-  { id:69, name:'Marcela Eugenia Campos', table:8,  rsvp:'yes',     trivia:9  },
-  { id:70, name:'Santiago Rodrigo Blanco', table:8, rsvp:'pending', trivia:null },
-  { id:71, name:'Teresa Rosario Fuentes', table:9,  rsvp:'yes',     trivia:7  },
-  { id:72, name:'Felipe Augusto Montes',  table:9,  rsvp:'yes',     trivia:10 },
-  { id:73, name:'Jimena Rocío Valencia',  table:9,  rsvp:'yes',     trivia:8  },
-  { id:74, name:'Rodrigo Esteban Cortés', table:10, rsvp:'pending', trivia:null },
-  { id:75, name:'Pilar Cristina Aguirre', table:10, rsvp:'yes',     trivia:6  },
-  { id:76, name:'Alfonso Gerardo Meza',   table:10, rsvp:'yes',     trivia:5  },
-  { id:77, name:'Blanca Estela Romero',   table:11, rsvp:'no',      trivia:null },
-  { id:78, name:'Ignacio Benjamín Salas', table:11, rsvp:'yes',     trivia:9  },
-  { id:79, name:'Gloria Patricia Reina',  table:11, rsvp:'yes',     trivia:7  },
-  { id:80, name:'Leandro Nicolás Parra',  table:12, rsvp:'pending', trivia:null },
-  { id:81, name:'Cecilia Monserrat Arias', table:12, rsvp:'yes',    trivia:8  },
-  { id:82, name:'Rodrigo Maximiliano Nava', table:1, rsvp:'yes',    trivia:6  },
-  { id:83, name:'Sofía Fernanda Acosta',  table:1,  rsvp:'yes',     trivia:10 },
-  { id:84, name:'Alberto Rafael Cisneros', table:2, rsvp:'no',      trivia:null },
-  { id:85, name:'Melisa Andrea Quiroz',   table:2,  rsvp:'yes',     trivia:7  },
-  { id:86, name:'Gerardo Arturo Alvarado', table:3, rsvp:'pending', trivia:null },
-  { id:87, name:'Mónica Leticia Serrano', table:3,  rsvp:'yes',     trivia:8  },
-  { id:88, name:'Alejandra Paulina Bravo', table:4, rsvp:'yes',     trivia:9  },
-  { id:89, name:'Humberto César Téllez',  table:4,  rsvp:'yes',     trivia:5  },
-  { id:90, name:'Lorena Guadalupe Ojeda', table:5,  rsvp:'pending', trivia:null },
-  { id:91, name:'Rubén Darío Espinosa',   table:5,  rsvp:'yes',     trivia:7  },
-  { id:92, name:'Cristina Isabel Zamora', table:6,  rsvp:'yes',     trivia:9  },
-  { id:93, name:'Marco Antonio Valdivia', table:6,  rsvp:'yes',     trivia:6  },
-  { id:94, name:'Nadia Alejandra Lagos',  table:7,  rsvp:'no',      trivia:null },
-  { id:95, name:'Julián Eduardo Ríos',    table:7,  rsvp:'yes',     trivia:8  },
-  { id:96, name:'Vanesa Carolina Herrera', table:8, rsvp:'yes',     trivia:7  },
-  { id:97, name:'Maximiliano Renato Sosa', table:8, rsvp:'pending', trivia:null },
-  { id:98, name:'Graciela Noemí Briones', table:9,  rsvp:'yes',     trivia:10 },
-  { id:99, name:'Ernestina Rocío Zavala', table:10, rsvp:'yes',     trivia:6  },
-  { id:100,name:'placeholder', table:1, rsvp:'pending', trivia:null },
-]; // array no usado - datos vienen del Sheet
-
-
-// ── URL del Apps Script ──
+/* ══ DATA — Google Sheet ══ */
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh9bZxBXH6qZGRH_VYmUhJ5xS-NmA8JZmFb7RkjtjI_3uWPvs6HzdZX97qrNnCCdGuow/exec';
 
-let allGuests     = [];   // datos mergeados del Sheet
+let allGuests     = [];
 let currentFilter = 'all';
 let currentSearch = '';
+let refreshTimer  = null;
 
-// ── Cargar y renderizar todo ──
-function initDashboard() {
-  showLoading(true);
+function initDashboard(){
+  showLoading();
   fetch(SHEET_URL + '?action=all')
     .then(r => r.json())
     .then(data => {
       allGuests = Array.isArray(data) ? data : [];
-      showLoading(false);
       updateStats();
       renderTable();
       animateProgress();
-      // Auto-refresh cada 60s
-      setInterval(refreshData, 60000);
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(refreshData, 60000);
     })
-    .catch(() => {
-      showLoading(false);
-      showError();
-    });
+    .catch(() => showError());
 }
 
-function refreshData() {
+function refreshData(){
   fetch(SHEET_URL + '?action=all')
     .then(r => r.json())
     .then(data => {
@@ -426,17 +636,27 @@ function refreshData() {
     }).catch(()=>{});
 }
 
-function showLoading(on) {
-  const tbody = document.getElementById('guestTableBody');
-  if (on) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;font-style:italic;color:rgba(240,230,211,0.25);font-family:'Cormorant Garamond',serif">⏳ Cargando invitados...</td></tr>`;
+function showLoading(){
+  document.getElementById('guestTableBody').innerHTML = `
+    <tr><td colspan="5">
+      <div class="empty-state">
+        <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10"/><path d="M16 8 v8 l5 3"/></svg>
+        Cargando invitados…
+      </div>
+    </td></tr>`;
 }
 
-function showError() {
-  const tbody = document.getElementById('guestTableBody');
-  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;font-style:italic;color:rgba(196,128,128,0.5);font-family:'Cormorant Garamond',serif">No se pudo conectar con el Sheet.<br>Verificá que el Apps Script esté publicado correctamente.</td></tr>`;
+function showError(){
+  document.getElementById('guestTableBody').innerHTML = `
+    <tr><td colspan="5">
+      <div class="empty-state error">
+        <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13"/><path d="M11 11 l10 10 M21 11 l-10 10"/></svg>
+        No se pudo conectar con el Sheet.<br>Verificá que el Apps Script esté publicado.
+      </div>
+    </td></tr>`;
 }
 
-function updateStats() {
+function updateStats(){
   const yes     = allGuests.filter(g => g.asistencia === 'Confirma').length;
   const no      = allGuests.filter(g => g.asistencia === 'No asiste').length;
   const pending = allGuests.filter(g => !g.asistencia || g.asistencia === 'Pendiente').length;
@@ -446,72 +666,57 @@ function updateStats() {
   document.getElementById('statPending').textContent = pending;
 }
 
-function animateProgress() {
+function animateProgress(){
   const yes = allGuests.filter(g => g.asistencia === 'Confirma').length;
   const pct = allGuests.length ? Math.round(yes / allGuests.length * 100) : 0;
   setTimeout(() => {
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressPct').textContent  = pct + '%';
-  }, 300);
+  }, 250);
 }
 
-function setFilter(f, btn) {
+function setFilter(f, btn){
   currentFilter = f;
   document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderTable();
 }
+function filterSearch(val){ currentSearch = val.toLowerCase(); renderTable(); }
 
-function filterSearch(val) {
-  currentSearch = val.toLowerCase();
-  renderTable();
-}
-
-function renderTable() {
+function renderTable(){
   let data = [...allGuests];
-
   if (currentFilter === 'yes')     data = data.filter(g => g.asistencia === 'Confirma');
   if (currentFilter === 'no')      data = data.filter(g => g.asistencia === 'No asiste');
   if (currentFilter === 'pending') data = data.filter(g => !g.asistencia || g.asistencia === 'Pendiente');
-  if (currentFilter === 'trivia')  data = data.filter(g => g.trivia !== null && g.trivia !== '');
-
-  if (currentSearch) data = data.filter(g => g.nombre.toLowerCase().includes(currentSearch));
+  if (currentFilter === 'trivia')  data = data.filter(g => g.trivia !== null && g.trivia !== '' && g.trivia !== undefined);
+  if (currentSearch) data = data.filter(g => (g.nombre||'').toLowerCase().includes(currentSearch));
 
   const tbody = document.getElementById('guestTableBody');
-
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;font-style:italic;color:rgba(240,230,211,0.25);font-family:'Cormorant Garamond',serif">Sin resultados</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">Sin resultados</div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = data.map((g, i) => {
     const rsvp = g.asistencia || 'Pendiente';
     const badge = rsvp === 'Confirma'
-      ? `<span class="badge badge-yes">✦ Confirma</span>`
+      ? `<span class="badge badge-yes">CONFIRMA</span>`
       : rsvp === 'No asiste'
-      ? `<span class="badge badge-no">✕ No asiste</span>`
-      : `<span class="badge badge-pending">· Pendiente</span>`;
+      ? `<span class="badge badge-no">NO ASISTE</span>`
+      : `<span class="badge badge-pending">PENDIENTE</span>`;
 
-    const menuHtml = g.menu && g.menu !== 'Estándar' && g.menu !== '-'
-      ? `<span style="font-family:'Cinzel',serif;font-size:0.4rem;letter-spacing:0.2em;color:rgba(201,168,76,0.55);display:block;margin-top:2px">${g.menu}</span>`
+    const menuHtml = g.menu && g.menu !== 'Estándar' && g.menu !== '-' && g.menu !== ''
+      ? `<span class="td-meta">${g.menu}</span>`
       : '';
-
-    const mesa = g.mesa ? `MESA ${g.mesa}` : '—';
-
-    const trivia = (g.trivia !== null && g.trivia !== '')
-      ? `<div class="score-bar">
-           <div class="score-mini"><div class="score-mini-fill" style="width:${g.trivia * 10}%"></div></div>
-           <span class="score-val">${g.trivia}/10</span>
-         </div>`
+    const mesa  = g.mesa ? `MESA ${g.mesa}` : '—';
+    const trivia = (g.trivia !== null && g.trivia !== '' && g.trivia !== undefined)
+      ? `<div class="score-bar"><div class="score-mini"><div class="score-mini-fill" style="width:${g.trivia*10}%"></div></div><span class="score-val">${g.trivia}/10</span></div>`
       : `<span class="no-score">—</span>`;
-
-    const fecha = g.fecha
-      ? `<span style="font-family:'Cinzel',serif;font-size:0.36rem;letter-spacing:0.15em;color:rgba(240,230,211,0.22);display:block;margin-top:2px">${g.fecha}</span>`
-      : '';
+    const fecha = g.fecha ? `<span class="td-fecha">${g.fecha}</span>` : '';
 
     return `<tr>
-      <td class="td-num">${i + 1}</td>
-      <td class="td-name">${g.nombre}${fecha}</td>
+      <td class="td-num">${String(i+1).padStart(2,'0')}</td>
+      <td class="td-name">${g.nombre || '—'}${fecha}</td>
       <td class="td-table">${mesa}</td>
       <td>${badge}${menuHtml}</td>
       <td>${trivia}</td>
@@ -519,11 +724,9 @@ function renderTable() {
   }).join('');
 }
 
-// Enter key on login
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none' && !document.getElementById('loginScreen').classList.contains('hide')) {
-    checkLogin();
-  }
+// Auto-focus password input
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('pwInput')?.focus(), 400);
 });
 </script>
 </body>
