@@ -310,7 +310,7 @@ button{ font-family:inherit; cursor:pointer; }
   opacity: 0;
 }
 .envelope.s3 .letter-script{
-  animation: writeReveal 2s cubic-bezier(.55,.06,.36,.95) 1.6s forwards;
+  animation: writeReveal 2.6s cubic-bezier(.55,.06,.36,.95) 1.2s forwards;
 }
 @keyframes writeReveal{
   0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
@@ -324,7 +324,7 @@ button{ font-family:inherit; cursor:pointer; }
   opacity:0;
 }
 .envelope.s3 .letter-amp{
-  animation: fadeUp .8s var(--ease) 2.2s forwards;
+  animation: fadeUp .9s var(--ease) 2.6s forwards;
 }
 .letter-rule{
   width: 0; height: 1px;
@@ -333,7 +333,7 @@ button{ font-family:inherit; cursor:pointer; }
   opacity: 0;
 }
 .envelope.s3 .letter-rule{
-  animation: ruleGrow 1s var(--ease) 3s forwards;
+  animation: ruleGrow 1.1s var(--ease) 3.4s forwards;
 }
 @keyframes ruleGrow{ 0%{width:0; opacity:0} 100%{width:60%; opacity:1} }
 .letter-date{
@@ -342,7 +342,7 @@ button{ font-family:inherit; cursor:pointer; }
   opacity:0;
 }
 .envelope.s3 .letter-date{
-  animation: fadeUp .8s var(--ease) 3.4s forwards;
+  animation: fadeUp .9s var(--ease) 4s forwards;
 }
 @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px) } to{ opacity:1; transform: translateY(0) } }
 
@@ -1633,23 +1633,23 @@ window.openEnvelope = function() {
   playSealCrack();
   spawnCrackParticles();
 
-  // T+450ms : Flap unfolds
-  setTimeout(() => env.classList.add('s2'), 450);
+  // T+500ms : Flap unfolds (un poco más suave)
+  setTimeout(() => env.classList.add('s2'), 500);
 
-  // T+1300ms : Letter rises out
-  setTimeout(() => env.classList.add('s3'), 1300);
+  // T+1500ms : Letter rises out (más espacio para ver el sobre abierto)
+  setTimeout(() => env.classList.add('s3'), 1500);
 
-  // T+2900ms : Final lift forward + burst
-  setTimeout(() => env.classList.add('s4'), 2900);
+  // T+4200ms : Final lift forward + burst (antes era 2900 — ahora damos tiempo de leer)
+  setTimeout(() => env.classList.add('s4'), 4200);
 
-  // T+3400ms : Transition cinematic zoom into invitation
+  // T+5800ms : Transition cinematic zoom into invitation (era 3400 — +2.4s para leer la carta)
   setTimeout(() => {
     const scr = document.getElementById('envScreen');
     if (scr) {
-      scr.style.transition = 'opacity .9s ease, transform .9s ease';
+      scr.style.transition = 'opacity 1.1s ease, transform 1.1s ease';
       scr.style.opacity = '0';
       scr.style.transform = 'scale(1.15)';
-      setTimeout(() => scr.classList.add('gone'), 950);
+      setTimeout(() => scr.classList.add('gone'), 1100);
     }
     elegantTransition(() => {
       const inv = document.getElementById('invitation');
@@ -1659,7 +1659,7 @@ window.openEnvelope = function() {
       const mb = document.getElementById('musicBtn');
       if (mb) { mb.classList.add('vis'); mb.textContent='♫'; }
     });
-  }, 3400);
+  }, 5800);
 };
 
 /* ══ ELEGANT TRANSITION ══ */
