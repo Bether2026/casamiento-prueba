@@ -1257,17 +1257,30 @@ function exportPdf(mode){
   const venueName  = document.getElementById('venueLabelHeader')?.textContent || 'SALÓN';
 
   const mesasHtml2 = mesasData.map(({ t, guests }) => {
+    if (t.isMain) {
+      // Mesa principal: título fijo + nombres de los novios como subtítulo, sin contador
+      const noviosRow = `<div class="pdf-novios">Sofía &amp; Andrés</div>`;
+      const guestRows = guests.filter(g => !['Sofía', 'Andrés', 'Sofia', 'Andres'].some(n => g.name.includes(n))).length
+        ? guests.map((g, i) => `<div class="pdf-gr"><span class="pdf-gnum">${i+1}</span>${g.name}</div>`).join('')
+        : '';
+      return `
+        <div class="pdf-mc main-c">
+          <div class="pdf-mc-top">
+            <div class="pdf-mc-name">★ MESA PRINCIPAL</div>
+          </div>
+          ${noviosRow}
+          ${guestRows ? `<div class="pdf-gl" style="margin-top:.5rem">${guestRows}</div>` : ''}
+        </div>`;
+    }
+    // Mesas regulares: lista numerada, sin x/y
     const rows = guests.length
-      ? guests.map(g => `<div class="pdf-gr"><span class="pdf-gdot"></span>${g.name}</div>`).join('')
+      ? guests.map((g, i) => `<div class="pdf-gr"><span class="pdf-gnum">${i+1}</span>${g.name}</div>`).join('')
       : `<div class="pdf-gempty">Sin asignaciones</div>`;
-    const pct = t.capacity ? Math.round(guests.length / t.capacity * 100) : 0;
     return `
-      <div class="pdf-mc ${t.isMain ? 'main-c' : ''}">
+      <div class="pdf-mc">
         <div class="pdf-mc-top">
-          <div class="pdf-mc-name">${t.isMain ? '★ ' : ''}${t.name.toUpperCase()}</div>
-          <div class="pdf-mc-cnt">${guests.length}/${t.capacity}</div>
+          <div class="pdf-mc-name">${t.name.toUpperCase()}</div>
         </div>
-        <div class="pdf-mbar"><div class="pdf-mbar-fill" style="width:${pct}%"></div></div>
         <div class="pdf-gl">${rows}</div>
       </div>`;
   }).join('');
@@ -1341,6 +1354,8 @@ function exportPdf(mode){
 }
 .pdf-gr:last-child{ border-bottom:none; }
 .pdf-gdot{ width:3px; height:3px; border-radius:50%; background:${gold}; opacity:.55; flex-shrink:0; }
+.pdf-novios{ font-family:'Pinyon Script',cursive; font-size:1.5rem; line-height:1.2; color:${gold}; opacity:.85; margin-bottom:.25rem; }
+.pdf-gnum{ font-family:'Cinzel',serif; font-size:.33rem; letter-spacing:.12em; color:${textSub}; min-width:1.4rem; flex-shrink:0; padding-top:.14rem; }
 .pdf-gempty{ font-style:italic; font-size:.8rem; color:${isDark?'rgba(240,230,211,.22)':'rgba(50,32,8,.28)'}; padding:.2rem 0; }
 .pdf-ftr{ margin-top:2.5rem; text-align:center; }
 .pdf-ftr-orn{ display:flex; align-items:center; justify-content:center; gap:1rem; margin-bottom:.7rem; }
